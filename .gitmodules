@@ -4,3 +4,9 @@
 [submodule "src/mvp_grasping"]
 	path = src/mvp_grasping
 	url = https://github.com/dougsm/mvp_grasp.git
+[submodule "src/graspnet_baseline"]
+	path = src/graspnet_baseline
+	url = https://github.com/graspnet/graspnet-baseline.git
+[submodule "src/pointnet_gpd"]
+	path = src/pointnet_gpd
+	url = https://github.com/lianghongzhuo/PointNetGPD.git
