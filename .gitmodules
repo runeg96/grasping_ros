@@ -1,0 +1,3 @@
+[submodule "src/gr_grasping"]
+	path = src/gr_grasping
+	url = https://github.com/skumra/robotic-grasping.git
