@@ -1,3 +1,6 @@
 [submodule "src/gr_grasping"]
 	path = src/gr_grasping
 	url = https://github.com/skumra/robotic-grasping.git
+[submodule "src/mvp_grasping"]
+	path = src/mvp_grasping
+	url = https://github.com/dougsm/mvp_grasp.git
