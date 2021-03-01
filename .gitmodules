@@ -13,3 +13,6 @@
 [submodule "src/gpd_ros"]
 	path = src/gpd_ros
 	url = https://github.com/Janx1913/gpd_ros
+[submodule "src/gpd"]
+	path = src/gpd
+	url = https://github.com/Janx1913/gpd
