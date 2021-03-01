@@ -48,44 +48,6 @@ def draw_grasp(grasp, camModel, debug=False):
         cv.destroyAllWindows()
 
 
-def old_create_marker(grasp):
-    ''' Old function for making grasp'''
-    grasp_marker = Marker()
-    grasp_marker.header.frame_id = rospy.get_param('~grasp/grasp_frame')
-    grasp_marker.type = grasp_marker.ARROW
-    grasp_marker.action = grasp_marker.ADD
-    
-    grasp_marker.scale.x, grasp_marker.scale.y, grasp_marker.scale.z = 0.3, 0.05, 0.05
-    grasp_marker.color.a = 1.0
-    grasp_marker.color.r, grasp_marker.color.g, grasp_marker.color.b = (0.0, 0.0, 1.0)
-      
-    grasp_marker.ns = 'grasp'
-    grasp_marker.id = 1
-
-    grasp_marker.pose = grasp.pose
-
-    grasp_marker.lifetime = rospy.Duration(0)
-    grasp_marker.header.stamp = rospy.get_rostime()
-
-    q_orig = [grasp_marker.pose.orientation.x, grasp_marker.pose.orientation.y, grasp_marker.pose.orientation.z, grasp_marker.pose.orientation.w]
-
-    marker_pub.publish(grasp_marker)
-
-
-    q_rot_pos = quaternion_from_euler(0, 0, math.pi/2)
-    q_rot_neg = quaternion_from_euler(0, 0, -math.pi/2)
-
-    q_new = quaternion_multiply(q_rot_pos, q_orig)
-    grasp_marker.pose.orientation.x, grasp_marker.pose.orientation.y, grasp_marker.pose.orientation.z, grasp_marker.pose.orientation.w = q_new
-    grasp_marker.id = 2
-    grasp_marker.pose.position.x -= 1.0
-    marker_pub.publish(grasp_marker)
-
-    q_new = quaternion_multiply(q_rot_neg, q_orig)
-    grasp_marker.pose.orientation.x, grasp_marker.pose.orientation.y, grasp_marker.pose.orientation.z, grasp_marker.pose.orientation.w = q_new
-    grasp_marker.id = 3
-    marker_pub.publish(grasp_marker)
-
 def create_marker():
 
     grasp_marker = Marker()
@@ -185,7 +147,6 @@ if __name__ == '__main__':
     tf_pub.publish(tfm)
 
     draw_grasp(new_grasp, cam, debug=True)
-    # old_create_marker(new_grasp)
     create_marker()
 
     rospy.spin()
