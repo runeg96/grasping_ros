@@ -1,4 +1,6 @@
 visualize_grasp:
+    grasp:
+        grasp_frame: ptu_camera_color_optical_frame
     camera:
         info_topic: /ptu_camera/camera/color/camera_info
         color_topic: /ptu_camera/camera/color/image_raw
@@ -8,3 +10,4 @@ visualize_grasp:
         grasp_topic: /grasp_input_topic
     output:
         image_points: /grasp_lib/drawn_grasp
+        marker_topic: /grasp_lib/markers
