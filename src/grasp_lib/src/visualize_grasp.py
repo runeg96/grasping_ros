@@ -17,6 +17,11 @@ from ggcnn.msg import Grasp
 
 def draw_grasp(grasp, camModel, debug=False):
     Points = list()
+    
+    width_img = grasp.width * 600 / 2 # TODO fix pixel width
+    
+    # width_m = width_img / 300.0 * 2.0 * depth_crop * np.tan(self.cam_fov * self.img_crop_size/depth.shape[0] / 2.0 / 180.0 * np.pi)
+
 
     # Project point to image place (grasp center)
     grasp_center = PinholeCameraModel.project3dToPixel(camModel, [grasp.pose.position.x, grasp.pose.position.y, grasp.pose.position.z])
@@ -27,8 +32,8 @@ def draw_grasp(grasp, camModel, debug=False):
     yaw = angle[2]
 
     # Calculate end points of gripper fingers (based on width and angle)
-    Points.append((grasp_center[0]-math.cos(yaw)*new_grasp.width, grasp_center[1]-math.sin(yaw)*new_grasp.width))
-    Points.append((grasp_center[0]+math.cos(yaw)*new_grasp.width, grasp_center[1]+math.sin(yaw)*new_grasp.width))
+    Points.append((grasp_center[0]-math.cos(yaw)*width_img, grasp_center[1]-math.sin(yaw)*width_img))
+    Points.append((grasp_center[0]+math.cos(yaw)*width_img, grasp_center[1]+math.sin(yaw)*width_img))
 
     # Draw points
     for point in Points:
@@ -48,7 +53,8 @@ def draw_grasp(grasp, camModel, debug=False):
         cv.destroyAllWindows()
 
 
-def create_grasp_markers():
+def create_grasp_markers(new_grasp):
+    width_m = new_grasp.width
 
     grasp_marker = Marker()
     grasp_marker.header.frame_id = 'grasp'
@@ -71,21 +77,21 @@ def create_grasp_markers():
     # grasp_marker.pose.position.x, grasp_marker.pose.position.y, grasp_marker.pose.position.z = 0.0, 0.0, 0.0
     grasp_marker.pose.orientation.w = 1.0 
 
-    grasp_marker.lifetime = rospy.Duration(0)
+    # grasp_marker.lifetime = rospy.Duration(0)
     grasp_marker.header.stamp = rospy.Time.now()
     marker_pub.publish(grasp_marker)
 
 
     grasp_marker.color.r, grasp_marker.color.g, grasp_marker.color.b = (0.0, 0.0, 1.0)
-    start.x, start.y, start.z = 0.0, 0.126, 0.0
-    end.x, end.y, end.z = 0.0, 0.026, 0.0    # TODO implement gripper width here
+    start.x, start.y, start.z = 0.0, 0.1+width_m/2, 0.0
+    end.x, end.y, end.z = 0.0, width_m/2, 0.0   
     grasp_marker.points[0] = start
     grasp_marker.points[1] = end
     grasp_marker.id = 2
     marker_pub.publish(grasp_marker)
 
-    start.x, start.y, start.z = 0.0, -0.126, 0.0
-    end.x, end.y, end.z = 0.0, -0.026, 0.0   # TODO implement gripper width here
+    start.x, start.y, start.z = 0.0, -0.1-width_m/2, 0.0
+    end.x, end.y, end.z = 0.0, -width_m/2, 0.0   
     grasp_marker.points[0] = start
     grasp_marker.points[1] = end
     grasp_marker.id = 3
@@ -126,9 +132,9 @@ if __name__ == '__main__':
     new_grasp.pose.orientation.z = 0
     new_grasp.pose.orientation.w = 0
 
-    new_grasp.width = 100.0 # 0.26
+    new_grasp.width = 0.26
     new_grasp.quality = 0.99
-
+   
     # Setting up grasping frame
     t = TransformStamped()
     t.header.frame_id = rospy.get_param('~grasp/grasp_frame')
@@ -147,7 +153,7 @@ if __name__ == '__main__':
     tf_pub.publish(tfm)
 
     draw_grasp(new_grasp, cam, debug=True)
-    create_grasp_markers()
+    create_grasp_markers(new_grasp)
 
     rospy.spin()
  
