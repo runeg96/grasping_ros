@@ -48,7 +48,7 @@ def draw_grasp(grasp, camModel, debug=False):
         cv.destroyAllWindows()
 
 
-def create_marker():
+def create_grasp_markers():
 
     grasp_marker = Marker()
     grasp_marker.header.frame_id = 'grasp'
@@ -69,10 +69,10 @@ def create_marker():
     grasp_marker.points.append(start)
     grasp_marker.points.append(end)
     # grasp_marker.pose.position.x, grasp_marker.pose.position.y, grasp_marker.pose.position.z = 0.0, 0.0, 0.0
-    grasp_marker.pose.orientation.x, grasp_marker.pose.orientation.y, grasp_marker.pose.orientation.z, grasp_marker.pose.orientation.w = 0.0, 0.0, 0.0, 1.0 
+    grasp_marker.pose.orientation.w = 1.0 
 
     grasp_marker.lifetime = rospy.Duration(0)
-    grasp_marker.header.stamp = rospy.get_rostime()
+    grasp_marker.header.stamp = rospy.Time.now()
     marker_pub.publish(grasp_marker)
 
 
@@ -147,7 +147,7 @@ if __name__ == '__main__':
     tf_pub.publish(tfm)
 
     draw_grasp(new_grasp, cam, debug=True)
-    create_marker()
+    create_grasp_markers()
 
     rospy.spin()
  
