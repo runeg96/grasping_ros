@@ -12,4 +12,4 @@
 	url = https://github.com/lianghongzhuo/PointNetGPD.git
 [submodule "src/gpd_ros"]
 	path = src/gpd_ros
-	url = https://github.com/atenpas/gpd_ros
+	url = https://github.com/Janx1913/gpd_ros
