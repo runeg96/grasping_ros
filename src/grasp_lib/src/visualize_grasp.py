@@ -82,21 +82,31 @@ def create_grasp_markers(new_grasp):
     marker_pub.publish(grasp_marker)
 
 
-    grasp_marker.color.r, grasp_marker.color.g, grasp_marker.color.b = (0.0, 0.0, 1.0)
-    start.x, start.y, start.z = 0.0, 0.1+width_m/2, 0.0
-    end.x, end.y, end.z = 0.0, width_m/2, 0.0   
-    grasp_marker.points[0] = start
-    grasp_marker.points[1] = end
+    # grasp_marker.color.r, grasp_marker.color.g, grasp_marker.color.b = (0.0, 0.0, 1.0)
+    # start.x, start.y, start.z = 0.0, 0.1+width_m/2, 0.0
+    # end.x, end.y, end.z = 0.0, width_m/2, 0.0   
+    # grasp_marker.points[0] = start
+    # grasp_marker.points[1] = end
+    # grasp_marker.id = 2
+    # marker_pub.publish(grasp_marker)
+
+    # start.x, start.y, start.z = 0.0, -0.1-width_m/2, 0.0
+    # end.x, end.y, end.z = 0.0, -width_m/2, 0.0   
+    # grasp_marker.points[0] = start
+    # grasp_marker.points[1] = end
+    # grasp_marker.id = 3
+    # marker_pub.publish(grasp_marker)
+
+    grasp_marker.type = grasp_marker.SPHERE
+    grasp_marker.pose.position.x, grasp_marker.pose.position.y, grasp_marker.pose.position.z = 0.0, width_m/2, 0.0
     grasp_marker.id = 2
     marker_pub.publish(grasp_marker)
 
-    start.x, start.y, start.z = 0.0, -0.1-width_m/2, 0.0
-    end.x, end.y, end.z = 0.0, -width_m/2, 0.0   
-    grasp_marker.points[0] = start
-    grasp_marker.points[1] = end
+    grasp_marker.pose.position.x, grasp_marker.pose.position.y, grasp_marker.pose.position.z = 0.0, -width_m/2, 0.0
     grasp_marker.id = 3
     marker_pub.publish(grasp_marker)
-    
+
+
 def grasp_callback(msg):
 
     # Setting up grasping frame
@@ -156,8 +166,6 @@ if __name__ == '__main__':
 
     # new_grasp.width = 0.26
     # new_grasp.quality = 0.99
-   
-
 
     # draw_grasp(new_grasp, cam, debug=True)
     # create_grasp_markers(new_grasp)
