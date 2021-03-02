@@ -37,7 +37,6 @@ def draw_grasp(grasp, camModel, debug=False):
 
     # Draw points
     for point in Points:
-        print(point)
         point = (int(x) for x in point)
         cv.circle(img, tuple(point), 5, (0, 0, 255), -1)
 
@@ -58,63 +57,44 @@ def create_grasp_markers(new_grasp):
     width_m = new_grasp.width
 
     grasp_marker = Marker()
-    grasp_marker_array = MarkerArray()
     
     grasp_marker.header.frame_id = 'grasp'
+    grasp_marker.lifetime = rospy.Duration(0)
     grasp_marker.type = grasp_marker.ARROW
     grasp_marker.action = grasp_marker.ADD
+    grasp_marker.ns = 'grasp_markers'
     
     grasp_marker.scale.x, grasp_marker.scale.y, grasp_marker.scale.z = 0.02, 0.03, 0.05
     grasp_marker.color.a = 1.0
     grasp_marker.color.r, grasp_marker.color.g, grasp_marker.color.b = (1.0, 0.0, 0.0)
-
-    # grasp_marker.id = 1
-
-    # start = Point()
-    # end = Point()
-    # start.x, start.y, start.z = 0.12, 0.0, 0.0
-    # end.x, end.y, end.z = 0.02, 0.0, 0.0
-    # grasp_marker.points.append(start)
-    # grasp_marker.points.append(end)
-    grasp_marker.pose.position.x, grasp_marker.pose.position.y, grasp_marker.pose.position.z = 0.0, 0.0, 0.0
     grasp_marker.pose.orientation.w = 1.0 
+    
+    grasp_marker.id = 1
+    start = Point(0.12, 0.0, 0.0)
+    end = Point(0.02, 0.0, 0.0)
+    grasp_marker.points.append(start)
+    grasp_marker.points.append(end)
 
-    grasp_marker.lifetime = rospy.Duration(0)
-    # grasp_marker.header.stamp = rospy.Time.now()
-    # marker_pub.publish(grasp_marker)
-    # rospy.sleep(0.1)
-    # grasp_marker_array.markers.append(grasp_marker)
+    marker_pub.publish(grasp_marker)
 
 
-    # grasp_marker.color.r, grasp_marker.color.g, grasp_marker.color.b = (0.0, 0.0, 1.0)
-    # start.x, start.y, start.z = 0.0, 0.1+width_m/2, 0.0
-    # end.x, end.y, end.z = 0.0, width_m/2, 0.0   
-    # grasp_marker.points[0] = start
-    # grasp_marker.points[1] = end
-    # grasp_marker.id = 2
-    # marker_pub.publish(grasp_marker)
+    grasp_marker.color.r, grasp_marker.color.g, grasp_marker.color.b = (0.0, 0.0, 1.0)
 
-    # start.x, start.y, start.z = 0.0, -0.1-width_m/2, 0.0
-    # end.x, end.y, end.z = 0.0, -width_m/2, 0.0   
-    # grasp_marker.points[0] = start
-    # grasp_marker.points[1] = end
-    # grasp_marker.id = 3
-    # marker_pub.publish(grasp_marker)
-
-    grasp_marker.type = grasp_marker.SPHERE
-    grasp_marker.pose.position.x, grasp_marker.pose.position.y, grasp_marker.pose.position.z = 0.0, width_m/2, 0.0
     grasp_marker.id = 2
-    grasp_marker.header.stamp = rospy.Time.now()
-    marker_pub.publish(grasp_marker)
-    rospy.sleep(0.3)
-    grasp_marker.header.stamp = rospy.Time.now()
-    marker_pub.publish(grasp_marker)
-    # grasp_marker_array.markers.append(grasp_marker)
+    start = Point(0.0, 0.1+width_m/2, 0.0)
+    end = Point(0.02, width_m/2, 0.0) 
+    grasp_marker.points[0] = start
+    grasp_marker.points[1] = end
 
-    # grasp_marker.pose.position.x, grasp_marker.pose.position.y, grasp_marker.pose.position.z = 0.0, -width_m/2, 0.0
-    # grasp_marker.id = 3
-    # grasp_marker.header.stamp = rospy.Time.now()
-    # marker_pub.publish(grasp_marker)
+    marker_pub.publish(grasp_marker)
+
+    grasp_marker.id = 3
+    start = Point(0.0, -0.1-width_m/2, 0.0)
+    end = Point(0.02, -width_m/2, 0.0) 
+    grasp_marker.points[0] = start
+    grasp_marker.points[1] = end
+
+    marker_pub.publish(grasp_marker)
 
 
 def grasp_callback(msg):
@@ -124,23 +104,14 @@ def grasp_callback(msg):
     t.header.frame_id = rospy.get_param('~grasp/grasp_frame')
     t.header.stamp = rospy.Time.now()
     t.child_frame_id = 'grasp'
-    t.transform.translation.x = msg.pose.position.x
-    t.transform.translation.y = msg.pose.position.y
-    t.transform.translation.z = msg.pose.position.z
-
-    t.transform.rotation.x = msg.pose.orientation.x
-    t.transform.rotation.y = msg.pose.orientation.y
-    t.transform.rotation.z = msg.pose.orientation.z
-    t.transform.rotation.w = msg.pose.orientation.w
+    t.transform.translation = msg.pose.position
+    t.transform.rotation = msg.pose.orientation
 
     tfm = tf.msg.tfMessage([t])
     tf_pub.publish(tfm)
 
-
-    # draw_grasp(msg, cam, debug=False)
+    draw_grasp(msg, cam, debug=False)
     create_grasp_markers(msg)
-    # rospy.sleep(0.5)
-    # create_grasp_markers(msg)
 
 
 
@@ -150,7 +121,6 @@ if __name__ == '__main__':
     
     image_pub = rospy.Publisher(rospy.get_param('~output/image_points'), Image, queue_size=1)
     marker_pub = rospy.Publisher(rospy.get_param('~output/marker_topic'), Marker, queue_size=10)
-    markers_array_pub = rospy.Publisher('grasp_lib/markers_array', MarkerArray, queue_size=1)
     tf_pub = rospy.Publisher('/tf', tf.msg.tfMessage, queue_size=1)
 
     bridge = CvBridge()
@@ -164,24 +134,6 @@ if __name__ == '__main__':
     img = bridge.imgmsg_to_cv2(img_msg, desired_encoding='passthrough')
 
     rospy.Subscriber(rospy.get_param('~input/grasp_topic'), Grasp, grasp_callback)
-
-    # Test grasp
-    # new_grasp = Grasp()
-
-    # new_grasp.pose.position.x = 0.0
-    # new_grasp.pose.position.y = 0.0
-    # new_grasp.pose.position.z = -0.06
-
-    # new_grasp.pose.orientation.x = 0.98
-    # new_grasp.pose.orientation.y = 0.18
-    # new_grasp.pose.orientation.z = 0
-    # new_grasp.pose.orientation.w = 0
-
-    # new_grasp.width = 0.26
-    # new_grasp.quality = 0.99
-
-    # draw_grasp(new_grasp, cam, debug=True)
-    # create_grasp_markers(new_grasp)
 
     rospy.spin()
  
