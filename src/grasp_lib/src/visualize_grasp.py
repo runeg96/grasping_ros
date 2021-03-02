@@ -10,7 +10,7 @@ from sensor_msgs.msg import Image, CameraInfo
 from visualization_msgs.msg import Marker
 from geometry_msgs.msg import TransformStamped, Point
 from image_geometry import PinholeCameraModel
-from tf.transformations import euler_from_quaternion, quaternion_from_euler, quaternion_multiply
+from tf.transformations import euler_from_quaternion
 
 from ggcnn.msg import Grasp
 
@@ -77,7 +77,7 @@ def create_grasp_markers(new_grasp):
     # grasp_marker.pose.position.x, grasp_marker.pose.position.y, grasp_marker.pose.position.z = 0.0, 0.0, 0.0
     grasp_marker.pose.orientation.w = 1.0 
 
-    # grasp_marker.lifetime = rospy.Duration(0)
+    grasp_marker.lifetime = rospy.Duration(0)
     grasp_marker.header.stamp = rospy.Time.now()
     marker_pub.publish(grasp_marker)
 
