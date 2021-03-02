@@ -97,7 +97,29 @@ def create_grasp_markers(new_grasp):
     grasp_marker.id = 3
     marker_pub.publish(grasp_marker)
     
-    
+def grasp_callback(msg):
+
+    # Setting up grasping frame
+    t = TransformStamped()
+    t.header.frame_id = rospy.get_param('~grasp/grasp_frame')
+    t.header.stamp = rospy.Time.now()
+    t.child_frame_id = 'grasp'
+    t.transform.translation.x = msg.pose.position.x
+    t.transform.translation.y = msg.pose.position.y
+    t.transform.translation.z = msg.pose.position.z
+
+    t.transform.rotation.x = msg.pose.orientation.x
+    t.transform.rotation.y = msg.pose.orientation.y
+    t.transform.rotation.z = msg.pose.orientation.z
+    t.transform.rotation.w = msg.pose.orientation.w
+
+    tfm = tf.msg.tfMessage([t])
+    tf_pub.publish(tfm)
+
+
+    draw_grasp(msg, cam, debug=False)
+    create_grasp_markers(msg)
+
 
 
 if __name__ == '__main__':
@@ -118,42 +140,27 @@ if __name__ == '__main__':
     img_msg = rospy.wait_for_message(rospy.get_param('~camera/color_topic'), Image, timeout=None)
     img = bridge.imgmsg_to_cv2(img_msg, desired_encoding='passthrough')
 
-    # rospy.Subscriber(rospy.get_param('~input/grasp_topic'), Grasp, grasp_callback)
+    rospy.Subscriber(rospy.get_param('~input/grasp_topic'), Grasp, grasp_callback)
 
     # Test grasp
-    new_grasp = Grasp()
+    # new_grasp = Grasp()
 
-    new_grasp.pose.position.x = 0.0
-    new_grasp.pose.position.y = 0.0
-    new_grasp.pose.position.z = -0.06
+    # new_grasp.pose.position.x = 0.0
+    # new_grasp.pose.position.y = 0.0
+    # new_grasp.pose.position.z = -0.06
 
-    new_grasp.pose.orientation.x = 0.98
-    new_grasp.pose.orientation.y = 0.18
-    new_grasp.pose.orientation.z = 0
-    new_grasp.pose.orientation.w = 0
+    # new_grasp.pose.orientation.x = 0.98
+    # new_grasp.pose.orientation.y = 0.18
+    # new_grasp.pose.orientation.z = 0
+    # new_grasp.pose.orientation.w = 0
 
-    new_grasp.width = 0.26
-    new_grasp.quality = 0.99
+    # new_grasp.width = 0.26
+    # new_grasp.quality = 0.99
    
-    # Setting up grasping frame
-    t = TransformStamped()
-    t.header.frame_id = rospy.get_param('~grasp/grasp_frame')
-    t.header.stamp = rospy.Time.now()
-    t.child_frame_id = 'grasp'
-    t.transform.translation.x = new_grasp.pose.position.x
-    t.transform.translation.y = new_grasp.pose.position.y
-    t.transform.translation.z = new_grasp.pose.position.z
 
-    t.transform.rotation.x = new_grasp.pose.orientation.x
-    t.transform.rotation.y = new_grasp.pose.orientation.y
-    t.transform.rotation.z = new_grasp.pose.orientation.z
-    t.transform.rotation.w = new_grasp.pose.orientation.w
 
-    tfm = tf.msg.tfMessage([t])
-    tf_pub.publish(tfm)
-
-    draw_grasp(new_grasp, cam, debug=True)
-    create_grasp_markers(new_grasp)
+    # draw_grasp(new_grasp, cam, debug=True)
+    # create_grasp_markers(new_grasp)
 
     rospy.spin()
  
