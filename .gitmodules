@@ -16,3 +16,9 @@
 [submodule "src/gr_grasp"]
 	path = src/gr_grasp
 	url = https://github.com/runeg96/robotic-grasping.git
+[submodule "src/graspnetAPI"]
+	path = src/graspnetAPI
+	url = https://github.com/graspnet/graspnetAPI.git
+[submodule "src/pointnet2_pytorch"]
+	path = src/pointnet2_pytorch
+	url = https://github.com/erikwijmans/Pointnet2_PyTorch.git
