@@ -16,3 +16,6 @@
 [submodule "src/gr_grasp"]
 	path = src/gr_grasp
 	url = https://github.com/runeg96/robotic-grasping.git
+[submodule "src/ros_deep_grasp"]
+	path = src/ros_deep_grasp
+	url = https://github.com/Janx1913/ros_deep_grasp
