@@ -25,3 +25,6 @@
 [submodule "src/pointnet2_pytorch"]
 	path = src/pointnet2_pytorch
 	url = https://github.com/erikwijmans/Pointnet2_PyTorch.git
+[submodule "src/pytorch_6dof-graspnet"]
+	path = src/pytorch_6dof-graspnet
+	url = https://github.com/jsll/pytorch_6dof-graspnet
