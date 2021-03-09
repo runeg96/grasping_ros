@@ -11,14 +11,14 @@ import argparse
 # import importlib
 import rospy
 # import scipy.io as scio
-# from PIL import Image
+from PIL import Image
 from cv_bridge import CvBridge
 
 import torch
 from graspnetAPI import GraspGroup
 
 from sensor_msgs.msg import CameraInfo as CamInfo
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image as Img
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(ROOT_DIR, '../../graspnet_baseline/models'))
@@ -58,10 +58,10 @@ def get_net():
 def get_and_process_data():
     # load data
     bridge = CvBridge()
-    color_msg = rospy.wait_for_message('ptu_camera/camera/color/image_raw', Image, timeout=None)
+    color_msg = rospy.wait_for_message('ptu_camera/camera/color/image_raw', Img, timeout=None)
     color_img = bridge.imgmsg_to_cv2(color_msg, desired_encoding='passthrough')
 
-    depth_msg = rospy.wait_for_message('ptu_camera/camera/depth/image_raw', Image, timeout=None)
+    depth_msg = rospy.wait_for_message('ptu_camera/camera/depth/image_raw', Img, timeout=None)
     depth_img = bridge.imgmsg_to_cv2(depth_msg, desired_encoding='passthrough')
 
     color = np.array((color_img), dtype=np.float32) / 255.0
