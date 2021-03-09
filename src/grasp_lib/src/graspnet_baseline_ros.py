@@ -8,11 +8,10 @@ import sys
 import numpy as np
 import open3d as o3d
 import argparse
-# import importlib
+
 import rospy
-# import scipy.io as scio
+
 from PIL import Image
-from cv_bridge import CvBridge
 
 import torch
 from graspnetAPI import GraspGroup
@@ -26,7 +25,6 @@ sys.path.append(os.path.join(ROOT_DIR, '../../graspnet_baseline/dataset'))
 sys.path.append(os.path.join(ROOT_DIR, '../../graspnet_baseline/utils'))
 
 from graspnet import GraspNet, pred_decode
-# from graspnet_dataset import GraspNetDataset
 from collision_detector import ModelFreeCollisionDetector
 from data_utils import CameraInfo, create_point_cloud_from_depth_image
 
@@ -37,8 +35,7 @@ parser.add_argument('--num_point', type=int, default=20000, help='Point Number [
 parser.add_argument('--num_view', type=int, default=300, help='View Number [default: 300]')
 parser.add_argument('--collision_thresh', type=float, default=0.01, help='Collision Threshold in collision detection [default: 0.01]')
 parser.add_argument('--voxel_size', type=float, default=0.01, help='Voxel Size to process point clouds before collision detection [default: 0.01]')
-cfgs = parser.parse_args()
-
+cfgs, unknown = parser.parse_known_args()
 
 def get_net():
     # Init the model
@@ -57,22 +54,21 @@ def get_net():
 
 def get_and_process_data():
     # load data
-    bridge = CvBridge()
-    color_msg = rospy.wait_for_message('ptu_camera/camera/color/image_raw', Img, timeout=None)
-    color_img = bridge.imgmsg_to_cv2(color_msg, desired_encoding='passthrough')
+    color_msg = rospy.wait_for_message('ptu_camera/camera/color/image_raw', Img, timeout=rospy.Duration(1))
+    color_img = np.frombuffer(color_msg.data, dtype=np.uint8).reshape(color_msg.height, color_msg.width, -1)
 
-    depth_msg = rospy.wait_for_message('ptu_camera/camera/depth/image_raw', Img, timeout=None)
-    depth_img = bridge.imgmsg_to_cv2(depth_msg, desired_encoding='passthrough')
+    depth_msg = rospy.wait_for_message('ptu_camera/camera/aligned_depth_to_color/image_raw', Img, timeout=rospy.Duration(1))
+    depth = np.frombuffer(depth_msg.data, dtype=np.uint16).reshape(depth_msg.height, depth_msg.width)
 
     color = np.array((color_img), dtype=np.float32) / 255.0
-    depth = np.array((depth_img))
+
 
     workspace_mask = np.array(Image.open(cfgs.mask_path), dtype=bool)
 
-    cam_info = rospy.wait_for_message('ptu_camera/camera/color/camera_info', CamInfo, timeout=None)
+    cam_info = rospy.wait_for_message('ptu_camera/camera/color/camera_info', CamInfo, timeout=rospy.Duration(1))
 
     # generate cloud
-    camera = CameraInfo(cam_info.width, cam_info.heigth, cam_info.K[0][0], cam_info.K[1][1], cam_info.K[0][2], cam_info.K[1][2], 1000)
+    camera = CameraInfo(cam_info.width, cam_info.height, cam_info.K[0], cam_info.K[4], cam_info.K[2], cam_info.K[5], 1000)
     cloud = create_point_cloud_from_depth_image(depth, camera, organized=True)
 
     # get valid points
