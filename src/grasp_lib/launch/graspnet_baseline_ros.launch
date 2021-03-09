@@ -1,7 +1,5 @@
 <?xml version="1.0" ?>
 
 <launch>
-  <node name="graspnet_baseline_ros" pkg="grasp_lib" type="graspnet_baseline_ros.py" 
-  args="--checkpoint_path logs/log_kn/checkpoint.tar
-  --mask_path /home/jan/Documents/lh7_handover_ws/src/lh7-handover/grasping_ros/src/graspnet_baseline/doc/example_data/workspace_mask.png" output="screen"/>
+  <node name="graspnet_baseline_ros1" pkg="grasp_lib" type="graspnet_baseline_ros.py" args="--checkpoint_path $(find grasp_lib)/resources/checkpoint-rs.tar --mask_path $(find grasp_lib)/resources/workspace_mask_1280.png" output="screen"/>
 </launch>
