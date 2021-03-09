@@ -42,7 +42,7 @@ def segment_cloud(cloud, pixels):
 
     new_cloud = pypcd.make_xyz_rgb_point_cloud(X.astype(np.float32))
     msg = new_cloud.to_msg()
-    msg.header.frame_id = 'base_camera_color_optical_frame'
+    msg.header.frame_id = 'ptu_camera_color_optical_frame'
     msg.header.stamp = rospy.Time.now()
 
     return msg
