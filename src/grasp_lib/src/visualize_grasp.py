@@ -53,8 +53,9 @@ def draw_grasp(grasp, camModel, debug=False):
         cv.destroyAllWindows()
 
 
-def create_grasp_markers(new_grasp):
+def create_grasp_markers(new_grasp, type="gripper"):
     width_m = new_grasp.width
+    depth = 0.06
 
     grasp_marker = Marker()
     
@@ -67,35 +68,51 @@ def create_grasp_markers(new_grasp):
     
     grasp_marker.scale.x, grasp_marker.scale.y, grasp_marker.scale.z = 0.02, 0.03, 0.05
     grasp_marker.color.a = 1.0
-    grasp_marker.color.r, grasp_marker.color.g, grasp_marker.color.b = (1.0, 0.0, 0.0)
     grasp_marker.pose.orientation.w = 1.0 
-    
-    grasp_marker.id = 1
-    start = Point(0.12, 0.0, 0.0)
-    end = Point(0.02, 0.0, 0.0)
-    grasp_marker.points.append(start)
-    grasp_marker.points.append(end)
 
-    marker_pub.publish(grasp_marker)
+    if type == "arrow":
+        grasp_marker.color.r, grasp_marker.color.g, grasp_marker.color.b = (1.0, 0.0, 0.0)
 
+        grasp_marker.id = 1
+        start = Point(0.10+depth, 0.0, 0.0)
+        end = Point(depth, 0.0, 0.0)
+        grasp_marker.points.append(start)
+        grasp_marker.points.append(end)
 
-    grasp_marker.color.r, grasp_marker.color.g, grasp_marker.color.b = (0.0, 0.0, 1.0)
+        marker_pub.publish(grasp_marker)
 
-    grasp_marker.id = 2
-    start = Point(0.0, 0.1+width_m/2, 0.0)
-    end = Point(0.02, width_m/2, 0.0) 
-    grasp_marker.points[0] = start
-    grasp_marker.points[1] = end
+        grasp_marker.color.r, grasp_marker.color.g, grasp_marker.color.b = (0.0, 0.0, 1.0)
 
-    marker_pub.publish(grasp_marker)
+        grasp_marker.id = 2
+        start = Point(0.0, 0.1+width_m/2, 0.0)
+        end = Point(depth, width_m/2, 0.0) 
+        grasp_marker.points[0] = start
+        grasp_marker.points[1] = end
 
-    grasp_marker.id = 3
-    start = Point(0.0, -0.1-width_m/2, 0.0)
-    end = Point(0.02, -width_m/2, 0.0) 
-    grasp_marker.points[0] = start
-    grasp_marker.points[1] = end
+        marker_pub.publish(grasp_marker)
 
-    marker_pub.publish(grasp_marker)
+        grasp_marker.id = 3
+        start = Point(0.0, -0.1-width_m/2, 0.0)
+        end = Point(depth, -width_m/2, 0.0) 
+        grasp_marker.points[0] = start
+        grasp_marker.points[1] = end
+
+        marker_pub.publish(grasp_marker)
+
+    elif type == "gripper":
+        grasp_marker.color.r, grasp_marker.color.g, grasp_marker.color.b = (0.0, 1.0, 0.0)
+        grasp_marker.type = grasp_marker.LINE_LIST
+        grasp_marker.id = 4
+        grasp_marker.points.append(Point(0.10+depth, 0.0, 0.0))
+        grasp_marker.points.append(Point(depth, 0.0, 0.0))
+        grasp_marker.points.append(Point(depth, width_m/2, 0.0))
+        grasp_marker.points.append(Point(depth, -width_m/2, 0.0))
+        grasp_marker.points.append(Point(depth, width_m/2, 0.0))
+        grasp_marker.points.append(Point(0.0, width_m/2, 0.0))
+        grasp_marker.points.append(Point(depth, -width_m/2, 0.0))
+        grasp_marker.points.append(Point(0.0, -width_m/2, 0.0))
+
+        marker_pub.publish(grasp_marker)
 
 
 def grasp_callback(msg):
