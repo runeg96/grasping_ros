@@ -2,5 +2,6 @@
 
 <launch>
   <rosparam command="load" file="$(find grasp_lib)/cfg/visualizer.yaml" />
+  <node name="grasp_parser" pkg="grasp_lib" type="grasptype_parser.py" output="screen"/>
   <node name="visualize_grasp" pkg="grasp_lib" type="visualize_grasp.py" output="screen"/>
 </launch>
