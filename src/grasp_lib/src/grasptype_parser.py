@@ -9,7 +9,7 @@ from std_msgs.msg import Float32MultiArray
 from ggcnn.msg import Grasp
 
 
-def parser_callback(msg):
+def gg_callback(msg):
     '''
     ggcnn: msg.data = [x, y, z, ang, width, depth_center]
     '''
@@ -20,7 +20,7 @@ def parser_callback(msg):
     new_grasp.pose.position.y = msg.data[1]
     new_grasp.pose.position.z = msg.data[2]
 
-    
+
     q = quaternion_from_euler(0.0, 0.0, msg.data[3])
     new_grasp.pose.orientation.x = q[0]
     new_grasp.pose.orientation.y = q[1]
@@ -40,5 +40,5 @@ rospy.init_node("grasptype_parser_node")
 
 grasp_pub = rospy.Publisher(rospy.get_param("visualize_grasp/input/grasp_topic"), Grasp, queue_size=1)
 
-rospy.Subscriber('ggcnn/out/command', Float32MultiArray, parser_callback)
+rospy.Subscriber('ggcnn/out/command', Float32MultiArray, gg_callback)
 rospy.spin()

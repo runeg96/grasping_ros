@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 """ ROS implementation of graspnet_baseline demo
-    Author: Jan Kjaer Joorgensen
+    Author: Jan Kjaer Joorgensen and Rune
 """
 
 import os
@@ -15,6 +15,9 @@ from PIL import Image
 
 import torch
 from graspnetAPI import GraspGroup
+from ggcnn.msg import Grasp
+
+from scipy.spatial.transform import Rotation as R
 
 from sensor_msgs.msg import CameraInfo as CamInfo
 from sensor_msgs.msg import Image as Img
@@ -122,13 +125,37 @@ def vis_grasps(gg, cloud):
     o3d.visualization.draw_geometries([cloud, *grippers])
 
 def demo():
-    net = get_net()
+    global net
     end_points, cloud = get_and_process_data()
     gg = get_grasps(net, end_points)
     if cfgs.collision_thresh > 0:
         gg = collision_detection(gg, np.array(cloud.points))
-    vis_grasps(gg, cloud)
+    gg.sort_by_score()
+    print(gg[0])
+    grasp_paser(gg[0])
+    # vis_grasps(gg, cloud)
+
+def grasp_paser(gg):
+    vis_grasp = Grasp()
+    vis_grasp.pose.position.x = gg.translation[0]
+    vis_grasp.pose.position.y = gg.translation[1]
+    vis_grasp.pose.position.z = gg.translation[2]
+
+    r = R.from_matrix(gg.rotation_matrix)
+    q = r.as_quat()
+
+    vis_grasp.pose.orientation.x = q[0]
+    vis_grasp.pose.orientation.y = q[1]
+    vis_grasp.pose.orientation.z = q[2]
+    vis_grasp.pose.orientation.w = q[3]
+    vis_grasp.quality = gg.score
+    vis_grasp.width = gg.width
+    
+    grasp_pub.publish(vis_grasp)
 
 if __name__=='__main__':
     rospy.init_node('graspnet_baseline_ros')
-    demo()
+    grasp_pub = rospy.Publisher(rospy.get_param("visualize_grasp/input/grasp_topic"), Grasp, queue_size=1)
+    net = get_net()
+    while not rospy.is_shutdown():
+        demo()
