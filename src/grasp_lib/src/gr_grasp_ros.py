@@ -14,7 +14,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch.utils.data
 
-from sensor_msgs.msg import Image
+from grasp_utils.utils import pixel_to_camera
+from ggcnn.msg import Grasp
+
+from sensor_msgs.msg import Image, CameraInfo
+from scipy.spatial.transform import Rotation
+
 
 # from hardware.camera import RealSenseCamera
 from hardware.device import get_device
@@ -34,7 +39,7 @@ def parse_args():
                         help='Use Depth image for evaluation (1/0)')
     parser.add_argument('--use-rgb', type=int, default=1,
                         help='Use RGB image for evaluation (1/0)')
-    parser.add_argument('--n-grasps', type=int, default=10,
+    parser.add_argument('--n-grasps', type=int, default=1,
                         help='Number of grasps to consider per image')
     parser.add_argument('--cpu', dest='force_cpu', action='store_true', default=False,
                         help='Force code to run in CPU mode')
@@ -48,6 +53,27 @@ def numpy_to_torch(s):
     else:
         return torch.from_numpy(s.astype(np.float32))
 
+def parse_grasp_to_rviz(grasp_point,width,quality,angle):
+        vis_grasp = Grasp()
+        vis_grasp.pose.position.x = grasp_point[0]
+        vis_grasp.pose.position.y = grasp_point[1]
+        vis_grasp.pose.position.z = grasp_point[2]
+
+        # Create a rotation object from Euler angles specifying axes of rotation
+        rot = Rotation.from_euler('xyz', [0, 0, angle])
+
+        # Convert to quaternions and print
+        q = rot.as_quat()
+
+        vis_grasp.pose.orientation.x = q[0]
+        vis_grasp.pose.orientation.y = q[1]
+        vis_grasp.pose.orientation.z = q[2]
+        vis_grasp.pose.orientation.w = q[3]
+        vis_grasp.quality = quality
+        vis_grasp.width = width
+        grasp_pub.publish(vis_grasp)
+
+
 def normalise(img):
     """
     Normalise the image by converting to float [0,1] and zero-centering
@@ -60,12 +86,13 @@ if __name__ == '__main__':
     args = parse_args()
 
     rospy.init_node("gr_grasp_ros")
+    grasp_pub = rospy.Publisher(rospy.get_param("visualize_grasp/input/grasp_topic"), Grasp, queue_size=1)
     # # Connect to Camera
     # logging.info('Connecting to camera...')
     # cam = RealSenseCamera(device_id=830112070066)
     # cam.connect()
     # cam_data = CameraData(include_depth=args.use_depth, include_rgb=args.use_rgb)
-
+    cam_info = rospy.wait_for_message('ptu_camera/camera/color/camera_info', CameraInfo, timeout=rospy.Duration(1))
     # Load Network
     logging.info('Loading model...')
     net = torch.load(args.network)
@@ -77,10 +104,6 @@ if __name__ == '__main__':
     try:
         fig = plt.figure(figsize=(10, 10))
         while True:
-            # image_bundle = cam.get_image_bundle()
-            # rgb = image_bundle['rgb']
-            # depth = image_bundle['aligned_depth']
-            # x, depth_img, rgb_img = cam_data.get_data(rgb=rgb, depth=depth)
 
             color_msg = rospy.wait_for_message('ptu_camera/camera/color/image_raw', Image, timeout=rospy.Duration(1))
             rgb_image = np.frombuffer(color_msg.data, dtype=np.uint8).reshape(color_msg.height, color_msg.width, -1)
@@ -98,15 +121,18 @@ if __name__ == '__main__':
 
                 q_img, ang_img, width_img = post_process_output(pred['pos'], pred['cos'], pred['sin'], pred['width'])
                 grasps = detect_grasps(q_img, ang_img, width_img)
-                print(grasps[0].center[0],grasps[0].center[1])
-                
-                plot_results(fig=fig,
-                             rgb_img=rgb_image,
-                             depth_img=depth_image,
-                             grasp_q_img=q_img,
-                             grasp_angle_img=ang_img,
-                             no_grasps=args.n_grasps,
-                             grasp_width_img=width_img)
+                depth = depth_image[grasps[0].center[0]][grasps[0].center[1]]
+                grasp_point = pixel_to_camera(cam_info,(grasps[0].center[0],grasps[0].center[1]),depth/1000)
+
+                parse_grasp_to_rviz(grasp_point,grasps[0].width,grasps[0].quality,grasps[0].angle)
+
+                # plot_results(fig=fig,
+                #              rgb_img=rgb_image,
+                #              depth_img=depth_image,
+                #              grasp_q_img=q_img,
+                #              grasp_angle_img=ang_img,
+                #              no_grasps=args.n_grasps,
+                #              grasp_width_img=width_img)
     finally:
         save_results(
             rgb_img=rgb_image,
