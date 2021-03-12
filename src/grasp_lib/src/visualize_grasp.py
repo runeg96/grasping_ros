@@ -15,7 +15,7 @@ from tf.transformations import euler_from_quaternion
 from ggcnn.msg import Grasp
 
 
-def draw_grasp(grasp, camModel, debug=False):
+def draw_grasp(grasp, image, camModel, debug=False):
     Points = list()
     
     width_img = grasp.width * 600 / 2 # TODO fix pixel width
@@ -41,7 +41,7 @@ def draw_grasp(grasp, camModel, debug=False):
         cv.circle(img, tuple(point), 5, (0, 0, 255), -1)
 
 
-    im_rgb = cv.cvtColor(img, cv.COLOR_BGR2RGB)
+    im_rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
 
     img_msg = bridge.cv2_to_imgmsg(im_rgb, encoding="passthrough")
     image_pub.publish(img_msg)
