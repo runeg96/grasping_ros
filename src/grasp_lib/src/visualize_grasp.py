@@ -60,17 +60,17 @@ def create_grasp_markers(new_grasp, type="gripper"):
     depth = 0.06
 
     grasp_marker = Marker()
-    
+
     grasp_marker.header.frame_id = 'grasp'
     # grasp_marker.header.stamp = rospy.Time.now()
     grasp_marker.lifetime = rospy.Duration(0)
     grasp_marker.type = grasp_marker.ARROW
     grasp_marker.action = grasp_marker.ADD
     grasp_marker.ns = 'grasp_markers'
-    
+
     grasp_marker.scale.x, grasp_marker.scale.y, grasp_marker.scale.z = 0.02, 0.03, 0.05
     grasp_marker.color.a = 1.0
-    grasp_marker.pose.orientation.w = 1.0 
+    grasp_marker.pose.orientation.w = 1.0
 
     if type == "arrow":
         grasp_marker.color.r, grasp_marker.color.g, grasp_marker.color.b = (1.0, 0.0, 0.0)
@@ -87,7 +87,7 @@ def create_grasp_markers(new_grasp, type="gripper"):
 
         grasp_marker.id = 2
         start = Point(0.0, 0.1+width_m/2, 0.0)
-        end = Point(depth, width_m/2, 0.0) 
+        end = Point(depth, width_m/2, 0.0)
         grasp_marker.points[0] = start
         grasp_marker.points[1] = end
 
@@ -95,7 +95,7 @@ def create_grasp_markers(new_grasp, type="gripper"):
 
         grasp_marker.id = 3
         start = Point(0.0, -0.1-width_m/2, 0.0)
-        end = Point(depth, -width_m/2, 0.0) 
+        end = Point(depth, -width_m/2, 0.0)
         grasp_marker.points[0] = start
         grasp_marker.points[1] = end
 
@@ -142,9 +142,9 @@ def grasp_callback(msg):
 
 
 if __name__ == '__main__':
-    
+
     rospy.init_node('visualize_grasp')
-    
+
     image_pub = rospy.Publisher(rospy.get_param('~output/image_points'), Image, queue_size=1)
     marker_pub = rospy.Publisher(rospy.get_param('~output/marker_topic'), Marker, queue_size=10)
     tf_pub = rospy.Publisher('/tf', tf.msg.tfMessage, queue_size=1)
@@ -164,4 +164,3 @@ if __name__ == '__main__':
     rospy.Subscriber(rospy.get_param('~input/grasp_topic'), Grasp, grasp_callback)
 
     rospy.spin()
- 
