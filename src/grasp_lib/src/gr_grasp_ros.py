@@ -87,6 +87,7 @@ if __name__ == '__main__':
 
     rospy.init_node("gr_grasp_ros")
     grasp_pub = rospy.Publisher(rospy.get_param("visualize_grasp/input/grasp_topic"), Grasp, queue_size=1)
+    img_pub = rospy.Publisher("gr_grasp/image", Image, queue_size=1)
     # # Connect to Camera
     # logging.info('Connecting to camera...')
     # cam = RealSenseCamera(device_id=830112070066)
@@ -101,44 +102,25 @@ if __name__ == '__main__':
     # Get the compute device
     device = get_device(args.force_cpu)
 
-    try:
-        fig = plt.figure(figsize=(10, 10))
-        while True:
+    while True:
 
-            color_msg = rospy.wait_for_message('ptu_camera/camera/color/image_raw', Image, timeout=rospy.Duration(1))
-            rgb_image = np.frombuffer(color_msg.data, dtype=np.uint8).reshape(color_msg.height, color_msg.width, -1)
-            rgb_img = normalise(rgb_image)
+        color_msg = rospy.wait_for_message('ptu_camera/camera/color/image_raw', Image, timeout=rospy.Duration(1))
+        rgb_image = np.frombuffer(color_msg.data, dtype=np.uint8).reshape(color_msg.height, color_msg.width, -1)
+        rgb_img = normalise(rgb_image)
 
-            depth_msg = rospy.wait_for_message('ptu_camera/camera/aligned_depth_to_color/image_raw', Image, timeout=rospy.Duration(1))
-            depth_image = np.frombuffer(depth_msg.data, dtype=np.uint16).reshape(depth_msg.height, depth_msg.width, -1)
-            depth_img = normalise(depth_image)
+        depth_msg = rospy.wait_for_message('ptu_camera/camera/aligned_depth_to_color/image_raw', Image, timeout=rospy.Duration(1))
+        depth_image = np.frombuffer(depth_msg.data, dtype=np.uint16).reshape(depth_msg.height, depth_msg.width, -1)
+        depth_img = normalise(depth_image)
 
-            x =  numpy_to_torch(np.concatenate((np.expand_dims(depth_img.transpose(2,0,1), 0), np.expand_dims(rgb_img.transpose(2,0,1), 0)), 1))
+        x =  numpy_to_torch(np.concatenate((np.expand_dims(depth_img.transpose(2,0,1), 0), np.expand_dims(rgb_img.transpose(2,0,1), 0)), 1))
 
-            with torch.no_grad():
-                xc = x.to(device)
-                pred = net.predict(xc)
+        with torch.no_grad():
+            xc = x.to(device)
+            pred = net.predict(xc)
 
-                q_img, ang_img, width_img = post_process_output(pred['pos'], pred['cos'], pred['sin'], pred['width'])
-                grasps = detect_grasps(q_img, ang_img, width_img)
-                depth = depth_image[grasps[0].center[0]][grasps[0].center[1]]
-                grasp_point = pixel_to_camera(cam_info,(grasps[0].center[0],grasps[0].center[1]),depth/1000)
+            q_img, ang_img, width_img = post_process_output(pred['pos'], pred['cos'], pred['sin'], pred['width'])
+            grasps = detect_grasps(q_img, ang_img, width_img)
+            depth = depth_image[grasps[0].center[0]][grasps[0].center[1]]
+            grasp_point = pixel_to_camera(cam_info,(grasps[0].center[0],grasps[0].center[1]),depth/1000)
 
-                parse_grasp_to_rviz(grasp_point,grasps[0].width,grasps[0].quality,grasps[0].angle)
-
-                # plot_results(fig=fig,
-                #              rgb_img=rgb_image,
-                #              depth_img=depth_image,
-                #              grasp_q_img=q_img,
-                #              grasp_angle_img=ang_img,
-                #              no_grasps=args.n_grasps,
-                #              grasp_width_img=width_img)
-    finally:
-        save_results(
-            rgb_img=rgb_image,
-            depth_img=depth_image,
-            grasp_q_img=q_img,
-            grasp_angle_img=ang_img,
-            no_grasps=args.n_grasps,
-            grasp_width_img=width_img
-        )
+            parse_grasp_to_rviz(grasp_point,grasps[0].width,grasps[0].quality,grasps[0].angle)
