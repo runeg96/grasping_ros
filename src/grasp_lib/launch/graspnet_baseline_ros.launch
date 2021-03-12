@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
 
 <launch>
-  <node name="graspnet_baseline_ros1" pkg="grasp_lib" type="graspnet_baseline_ros.py" args="--checkpoint_path $(find grasp_lib)/resources/checkpoint-rs.tar --mask_path $(find grasp_lib)/resources/workspace_mask_1280.png" output="screen"/>
+  <node name="graspnet_baseline_ros1" pkg="grasp_lib" type="graspnet_baseline_ros.py" args="--checkpoint_path $(find grasp_lib)/resources/checkpoint-rs.tar --mask_path $(find grasp_lib)/resources/workspace_mask_640.png" output="screen"/>
 </launch>
