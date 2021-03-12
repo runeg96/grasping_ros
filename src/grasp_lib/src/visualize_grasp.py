@@ -18,7 +18,8 @@ from ggcnn.msg import Grasp
 def draw_grasp(grasp, image, camModel, debug=False):
     Points = list()
     
-    width_img = grasp.width * 600 / 2 # TODO fix pixel width
+    if grasp.width < 10:
+        width_img = grasp.width * 600 / 2 # TODO fix pixel width
     
     # width_m = width_img / 300.0 * 2.0 * depth_crop * np.tan(self.cam_fov * self.img_crop_size/depth.shape[0] / 2.0 / 180.0 * np.pi)
 
@@ -38,7 +39,7 @@ def draw_grasp(grasp, image, camModel, debug=False):
     # Draw points
     for point in Points:
         point = (int(x) for x in point)
-        cv.circle(img, tuple(point), 5, (0, 0, 255), -1)
+        cv.circle(image, tuple(point), 5, (0, 0, 255), -1)
 
 
     im_rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
