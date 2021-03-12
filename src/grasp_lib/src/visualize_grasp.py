@@ -54,6 +54,7 @@ def draw_grasp(grasp, camModel, debug=False):
 
 
 def create_grasp_markers(new_grasp, type="gripper"):
+
     width_m = new_grasp.width
     depth = 0.06
 
@@ -115,7 +116,13 @@ def create_grasp_markers(new_grasp, type="gripper"):
         marker_pub.publish(grasp_marker)
 
 
+def image_callback(msg):
+    global img
+    img = bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
+
+
 def grasp_callback(msg):
+    global img, cam
 
     # Setting up grasping frame
     t = TransformStamped()
@@ -128,7 +135,7 @@ def grasp_callback(msg):
     tfm = tf.msg.tfMessage([t])
     tf_pub.publish(tfm)
 
-    draw_grasp(msg, cam, debug=False)
+    draw_grasp(msg, img, cam, debug=False)
     create_grasp_markers(msg)
 
 
@@ -141,15 +148,17 @@ if __name__ == '__main__':
     marker_pub = rospy.Publisher(rospy.get_param('~output/marker_topic'), Marker, queue_size=10)
     tf_pub = rospy.Publisher('/tf', tf.msg.tfMessage, queue_size=1)
 
-    bridge = CvBridge()
+    # if draw_image = True
+    if rospy.get_param('~options/draw_image'):
+        bridge = CvBridge()
 
-    # Load camera info
-    ci = rospy.wait_for_message(rospy.get_param('~camera/info_topic'), CameraInfo, timeout=None)
-    cam = PinholeCameraModel()
-    cam.fromCameraInfo(ci)
-    # Load camera image
-    img_msg = rospy.wait_for_message(rospy.get_param('~camera/color_topic'), Image, timeout=None)
-    img = bridge.imgmsg_to_cv2(img_msg, desired_encoding='passthrough')
+        # Load camera info
+        ci = rospy.wait_for_message(rospy.get_param('~camera/info_topic'), CameraInfo, timeout=None)
+        cam = PinholeCameraModel()
+        cam.fromCameraInfo(ci)
+
+        rospy.Subscriber(rospy.get_param('~~camera/color_topic'), Image, image_callback)
+
 
     rospy.Subscriber(rospy.get_param('~input/grasp_topic'), Grasp, grasp_callback)
 
