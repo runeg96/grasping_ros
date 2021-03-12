@@ -11,3 +11,5 @@ visualize_grasp:
     output:
         image_points: /grasp_lib/drawn_grasp
         marker_topic: /grasp_lib/markers
+    options:
+        draw_image: True
