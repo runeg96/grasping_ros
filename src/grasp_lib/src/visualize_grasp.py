@@ -17,10 +17,12 @@ from ggcnn.msg import Grasp
 
 def draw_grasp(grasp, image, camModel, debug=False):
     Points = list()
-    
+
     if grasp.width < 10:
         width_img = grasp.width * 600 / 2 # TODO fix pixel width
-    
+    else:
+        width_img = grasp.width
+
     # width_m = width_img / 300.0 * 2.0 * depth_crop * np.tan(self.cam_fov * self.img_crop_size/depth.shape[0] / 2.0 / 180.0 * np.pi)
 
 
