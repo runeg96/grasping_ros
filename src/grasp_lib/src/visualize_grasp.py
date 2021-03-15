@@ -12,23 +12,22 @@ from geometry_msgs.msg import TransformStamped, Point
 from image_geometry import PinholeCameraModel
 from tf.transformations import euler_from_quaternion
 
+
+from grasp_utils.utils import width_m_to_pixel
+
 from ggcnn.msg import Grasp
 
 
-def draw_grasp(grasp, image, camModel, debug=False):
+def draw_grasp(grasp, image, depth, camModel, debug=False):
     Points = list()
-
-    if grasp.width < 10:
-        width_img = grasp.width * 600 / 2 # TODO fix pixel width
-    else:
-        width_img = grasp.width
-
-    # width_m = width_img / 300.0 * 2.0 * depth_crop * np.tan(self.cam_fov * self.img_crop_size/depth.shape[0] / 2.0 / 180.0 * np.pi)
-
 
     # Project point to image place (grasp center)
     grasp_center = PinholeCameraModel.project3dToPixel(camModel, [grasp.pose.position.x, grasp.pose.position.y, grasp.pose.position.z])
     Points.append(grasp_center)
+
+    # Index depth and convert m to pixel (width)
+    depth_m = depth[grasp_center[0]][grasp_center[1]]
+    width_img = width_m_to_pixel(grasp.width, depth_m)
 
     # Get yaw from quaternion
     angle = euler_from_quaternion([grasp.pose.orientation.x, grasp.pose.orientation.y, grasp.pose.orientation.z, grasp.pose.orientation.w])
@@ -123,9 +122,13 @@ def image_callback(msg):
     global img
     img = bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
 
+def depth_callback(msg):
+    global depth
+    depth = bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
+
 
 def grasp_callback(msg):
-    global img, cam
+    global img, cam, depth
 
     # Setting up grasping frame
     t = TransformStamped()
@@ -138,8 +141,11 @@ def grasp_callback(msg):
     tfm = tf.msg.tfMessage([t])
     tf_pub.publish(tfm)
 
-    draw_grasp(msg, img, cam, debug=False)
     create_grasp_markers(msg)
+    
+    if rospy.get_param('~options/draw_image'):
+        draw_grasp(msg, img, depth, cam, debug=False)
+   
 
 
 
@@ -161,7 +167,7 @@ if __name__ == '__main__':
         cam.fromCameraInfo(ci)
 
         rospy.Subscriber(rospy.get_param('~~camera/color_topic'), Image, image_callback)
-
+        rospy.Subscriber(rospy.get_param('~~camera/depth_topic'), Image, depth_callback)
 
     rospy.Subscriber(rospy.get_param('~input/grasp_topic'), Grasp, grasp_callback)
 
