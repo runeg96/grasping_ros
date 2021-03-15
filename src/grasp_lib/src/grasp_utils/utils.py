@@ -4,10 +4,10 @@ import pyrealsense2 as rs
 FOCAL_D345 = 1.93 #mm
 
 def width_m_to_pixel(width_m, depth_m):
-    return (width_m / depth_m) * (FOCAL_D345/1000)
+    return (width_m * (FOCAL_D345/1000)) / depth_m 
 
 def width_pixel_to_m(width_pixel, depth_m):
-    return (width_pixel / (FOCAL_D345/1000)) * depth_m
+    return (width_pixel * depth_m) / (FOCAL_D345/1000)
     
 
 def cam_to_world(cam_point, world_to_cam):
