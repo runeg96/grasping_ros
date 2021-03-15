@@ -21,7 +21,7 @@ from ggcnn.msg import Grasp
 def draw_grasp(grasp, image, depth, camModel, debug=False):
     Points = list()
 
-    # Project point to image place (grasp center)
+    # Project point to image plane (grasp center)
     grasp_center = PinholeCameraModel.project3dToPixel(camModel, [grasp.pose.position.x, grasp.pose.position.y, grasp.pose.position.z])
     Points.append(grasp_center)
 
@@ -41,7 +41,6 @@ def draw_grasp(grasp, image, depth, camModel, debug=False):
     for point in Points:
         point = (int(x) for x in point)
         cv.circle(image, tuple(point), 5, (0, 0, 255), -1)
-
 
     im_rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
 

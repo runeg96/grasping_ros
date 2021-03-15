@@ -10,7 +10,6 @@ sys.path.append(os.path.join(ROOT_DIR, '../../gr_grasp'))
 import argparse
 import logging
 
-import matplotlib.pyplot as plt
 import numpy as np
 import torch.utils.data
 
@@ -20,12 +19,8 @@ from ggcnn.msg import Grasp
 from sensor_msgs.msg import Image, CameraInfo
 from scipy.spatial.transform import Rotation
 
-
-# from hardware.camera import RealSenseCamera
 from hardware.device import get_device
 from inference.post_process import post_process_output
-from utils.data.camera_data import CameraData
-from utils.visualisation.plot import save_results, plot_results
 from utils.dataset_processing.grasp import detect_grasps
 
 logging.basicConfig(level=logging.INFO)
@@ -53,16 +48,16 @@ def numpy_to_torch(s):
     else:
         return torch.from_numpy(s.astype(np.float32))
 
-def parse_grasp_to_rviz(grasp_point,width,quality,angle):
+def parse_grasp_to_rviz(grasp_point, width, quality, angle):
         vis_grasp = Grasp()
         vis_grasp.pose.position.x = grasp_point[0]
         vis_grasp.pose.position.y = grasp_point[1]
         vis_grasp.pose.position.z = grasp_point[2]
 
-        # Create a rotation object from Euler angles specifying axes of rotation
+        # Create a rotation object from Euler angles
         rot = Rotation.from_euler('xyz', [0, 0, angle])
 
-        # Convert to quaternions and print
+        # Convert to quaternions
         q = rot.as_quat()
 
         vis_grasp.pose.orientation.x = q[0]
@@ -82,18 +77,17 @@ def normalise(img):
     img -= img.mean()
     return img
 
+
 if __name__ == '__main__':
     args = parse_args()
 
     rospy.init_node("gr_grasp_ros")
+
     grasp_pub = rospy.Publisher(rospy.get_param("visualize_grasp/input/grasp_topic"), Grasp, queue_size=1)
     img_pub = rospy.Publisher("gr_grasp/image", Image, queue_size=1)
-    # # Connect to Camera
-    # logging.info('Connecting to camera...')
-    # cam = RealSenseCamera(device_id=830112070066)
-    # cam.connect()
-    # cam_data = CameraData(include_depth=args.use_depth, include_rgb=args.use_rgb)
+
     cam_info = rospy.wait_for_message('ptu_camera/camera/color/camera_info', CameraInfo, timeout=rospy.Duration(1))
+    
     # Load Network
     logging.info('Loading model...')
     net = torch.load(args.network)
@@ -123,4 +117,4 @@ if __name__ == '__main__':
             depth = depth_image[grasps[0].center[0]][grasps[0].center[1]]
             grasp_point = pixel_to_camera(cam_info,(grasps[0].center[0],grasps[0].center[1]),depth/1000)
 
-            parse_grasp_to_rviz(grasp_point,grasps[0].width,grasps[0].quality,grasps[0].angle)
+            parse_grasp_to_rviz(grasp_point, grasps[0].width, grasps[0].quality, grasps[0].angle)
