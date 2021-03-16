@@ -28,3 +28,6 @@
 [submodule "src/pytorch_6dof-graspnet"]
 	path = src/pytorch_6dof-graspnet
 	url = https://github.com/jsll/pytorch_6dof-graspnet
+[submodule "src/grasp_multiObject_multiGrasp"]
+	path = src/grasp_multiObject_multiGrasp
+	url = https://github.com/ivalab/grasp_multiObject_multiGrasp.git
