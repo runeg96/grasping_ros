@@ -1,7 +1,18 @@
 import numpy as np
+import math
 import pyrealsense2 as rs
 
 FOCAL_D345 = 1.93 #mm
+
+def new_width_pixel_to_m(width_pixel, center, angle, cam_info):
+    p1 = [center[0]-math.cos(angle)*width_pixel, center[1]-math.sin(angle)*width_pixel]
+    p2 = [center[0]+math.cos(angle)*width_pixel, center[1]+math.sin(angle)*width_pixel]
+
+    P1 = pixel_to_camera(cam_info, p1)
+    P2 = pixel_to_camera(cam_info, p2)
+
+    return math.sqrt((P2[0] - P1[0])**2 + (P2[1] - P1[1])**2 + (P2[2] - P1[2])**2)
+
 
 def width_m_to_pixel(width_m, depth_m):
     return (width_m * (FOCAL_D345/1000)) / depth_m 
