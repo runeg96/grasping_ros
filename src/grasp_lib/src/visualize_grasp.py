@@ -11,12 +11,13 @@ from visualization_msgs.msg import Marker, MarkerArray
 from geometry_msgs.msg import TransformStamped, Point
 from image_geometry import PinholeCameraModel
 from tf.transformations import euler_from_quaternion
-
+import numpy as np
 
 from grasp_utils.utils import width_m_to_pixel
 
 from ggcnn.msg import Grasp
 
+img = np.zeros((480,640))
 
 def draw_grasp(grasp, image, depth, camModel, debug=False):
     Points = list()
@@ -26,7 +27,7 @@ def draw_grasp(grasp, image, depth, camModel, debug=False):
     Points.append(grasp_center)
 
     # Index depth and convert m to pixel (width)
-    depth_m = depth[grasp_center[0]][grasp_center[1]]
+    depth_m = depth[int(grasp_center[0])][int(grasp_center[1])]
     width_img = width_m_to_pixel(grasp.width, depth_m)
 
     # Get yaw from quaternion
@@ -141,10 +142,10 @@ def grasp_callback(msg):
     tf_pub.publish(tfm)
 
     create_grasp_markers(msg)
-    
+
     if rospy.get_param('~options/draw_image'):
         draw_grasp(msg, img, depth, cam, debug=False)
-   
+
 
 
 

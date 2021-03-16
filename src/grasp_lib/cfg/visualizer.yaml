@@ -4,9 +4,9 @@ visualize_grasp:
     camera:
         info_topic: /ptu_camera/camera/color/camera_info
         color_topic: /ptu_camera/camera/color/image_raw
-        depth_topic: /ptu_camera/camera/depth/image_meters
+        depth_topic: /ptu_camera/camera/aligned_depth_to_color/image_raw
         camera_frame: ptu_camera_color_optical_frame
-    input: 
+    input:
         grasp_topic: /grasp_input_topic
     output:
         image_points: /grasp_lib/drawn_grasp

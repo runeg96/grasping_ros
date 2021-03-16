@@ -13,7 +13,7 @@ import logging
 import numpy as np
 import torch.utils.data
 
-from grasp_utils.utils import pixel_to_camera
+from grasp_utils.utils import pixel_to_camera, width_pixel_to_m
 from ggcnn.msg import Grasp
 
 from sensor_msgs.msg import Image, CameraInfo
@@ -84,10 +84,10 @@ if __name__ == '__main__':
     rospy.init_node("gr_grasp_ros")
 
     grasp_pub = rospy.Publisher(rospy.get_param("visualize_grasp/input/grasp_topic"), Grasp, queue_size=1)
-    img_pub = rospy.Publisher("gr_grasp/image", Image, queue_size=1)
+    # img_pub = rospy.Publisher("gr_grasp/image", Image, queue_size=1)
 
     cam_info = rospy.wait_for_message('ptu_camera/camera/color/camera_info', CameraInfo, timeout=rospy.Duration(1))
-    
+
     # Load Network
     logging.info('Loading model...')
     net = torch.load(args.network)
@@ -96,7 +96,7 @@ if __name__ == '__main__':
     # Get the compute device
     device = get_device(args.force_cpu)
 
-    while True:
+    while not rospy.is_shutdown():
 
         color_msg = rospy.wait_for_message('ptu_camera/camera/color/image_raw', Image, timeout=rospy.Duration(1))
         rgb_image = np.frombuffer(color_msg.data, dtype=np.uint8).reshape(color_msg.height, color_msg.width, -1)
@@ -117,4 +117,9 @@ if __name__ == '__main__':
             depth = depth_image[grasps[0].center[0]][grasps[0].center[1]]
             grasp_point = pixel_to_camera(cam_info,(grasps[0].center[0],grasps[0].center[1]),depth/1000)
 
-            parse_grasp_to_rviz(grasp_point, grasps[0].width, grasps[0].quality, grasps[0].angle)
+            m_width = width_pixel_to_m(grasps[0].width,depth/1000)
+            print("JANS STUPID CONVERSION: ",m_width)
+            print("GR width: ",grasps[0].width)
+            print("Depth: ", depth/1000, " Meters")
+
+            parse_grasp_to_rviz(grasp_point, m_width, grasps[0].quality, grasps[0].angle)
