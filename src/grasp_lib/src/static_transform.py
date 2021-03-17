@@ -17,18 +17,18 @@ if __name__ == '__main__':
         static_transformStamped = geometry_msgs.msg.TransformStamped()
 
         static_transformStamped.header.stamp = rospy.Time.now()
-        static_transformStamped.header.frame_id = "ptu_camera_depth_optical_frame"
+        static_transformStamped.header.frame_id = "world"
         static_transformStamped.child_frame_id = "task"
 
-        static_transformStamped.transform.translation.x = 0.166
-        static_transformStamped.transform.translation.y = 0.101
-        static_transformStamped.transform.translation.z = 0.515
+        static_transformStamped.transform.translation.x = -0.15
+        static_transformStamped.transform.translation.y = 0.0
+        static_transformStamped.transform.translation.z = 1.0
 
         # quat = tf.transformations.quaternion_from_euler(float(0),float(0),float(0))
-        static_transformStamped.transform.rotation.x = -0.679
-        static_transformStamped.transform.rotation.y = 0.726
-        static_transformStamped.transform.rotation.z = -0.074
-        static_transformStamped.transform.rotation.w = -0.081
+        static_transformStamped.transform.rotation.x = 0
+        static_transformStamped.transform.rotation.y = 0
+        static_transformStamped.transform.rotation.z = 0
+        static_transformStamped.transform.rotation.w = 1
 
         broadcaster.sendTransform(static_transformStamped)
         rospy.spin()
