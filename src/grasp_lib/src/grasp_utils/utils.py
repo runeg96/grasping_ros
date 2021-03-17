@@ -9,6 +9,9 @@ def width_pixel_to_m(width_pixel, depth_m, cam_info):
     fovx = 2 * math.atan(cam_info.width / (2 * cam_info.K[0]))
     return (2 * depth_m * math.tan(fovx/2)) / cam_info.width * width_pixel
 
+def width_m_to_pixel(width_m, depth_m, cam_info):
+    fovx = 2 * math.atan(cam_info.width / (2 * cam_info.K[0]))
+    return (width_m * cam_info.width) / (2 * depth_m * math.tan(fovx/2)) 
 
 def new_width_pixel_to_m(width_pixel, center, angle, cam_info):
     p1 = [center[0]-math.cos(angle)*width_pixel, center[1]-math.sin(angle)*width_pixel]
@@ -20,8 +23,8 @@ def new_width_pixel_to_m(width_pixel, center, angle, cam_info):
     return math.sqrt((P2[0] - P1[0])**2 + (P2[1] - P1[1])**2 + (P2[2] - P1[2])**2)
 
 
-def width_m_to_pixel(width_m, depth_m):
-    return (width_m * (FOCAL_D345/1000)) / depth_m
+# def width_m_to_pixel(width_m, depth_m):
+#     return (width_m * (FOCAL_D345/1000)) / depth_m
 
 # def width_pixel_to_m(width_pixel, depth_m):
 #     return (width_pixel * depth_m) / (FOCAL_D345/1000)
