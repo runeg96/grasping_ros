@@ -20,6 +20,7 @@ from ggcnn.msg import Grasp
 img = np.zeros((480,640))
 
 def draw_grasp(grasp, image, depth, camModel, debug=False):
+    global ci
     Points = list()
 
     # Project point to image plane (grasp center)
@@ -28,7 +29,7 @@ def draw_grasp(grasp, image, depth, camModel, debug=False):
 
     # Index depth and convert m to pixel (width)
     depth_m = depth[int(grasp_center[0])][int(grasp_center[1])]
-    width_img = width_m_to_pixel(grasp.width, depth_m)
+    width_img = width_m_to_pixel(grasp.width, depth_m, ci)
 
     # Get yaw from quaternion
     angle = euler_from_quaternion([grasp.pose.orientation.x, grasp.pose.orientation.y, grasp.pose.orientation.z, grasp.pose.orientation.w])
