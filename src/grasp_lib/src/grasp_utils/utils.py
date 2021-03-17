@@ -4,6 +4,12 @@ import pyrealsense2 as rs
 
 FOCAL_D345 = 1.93 #mm
 
+
+def width_pixel_to_m(width_pixel, depth_m, cam_info):
+    fovx = 2 *math.atan(cam_info.width / 2 * cam_info.K[0])
+    return width_pixel / cam_info.width * 2 * depth_m * math.tan(fovx/2)
+
+
 def new_width_pixel_to_m(width_pixel, center, angle, cam_info):
     p1 = [center[0]-math.cos(angle)*width_pixel, center[1]-math.sin(angle)*width_pixel]
     p2 = [center[0]+math.cos(angle)*width_pixel, center[1]+math.sin(angle)*width_pixel]
@@ -17,8 +23,8 @@ def new_width_pixel_to_m(width_pixel, center, angle, cam_info):
 def width_m_to_pixel(width_m, depth_m):
     return (width_m * (FOCAL_D345/1000)) / depth_m 
 
-def width_pixel_to_m(width_pixel, depth_m):
-    return (width_pixel * depth_m) / (FOCAL_D345/1000)
+# def width_pixel_to_m(width_pixel, depth_m):
+#     return (width_pixel * depth_m) / (FOCAL_D345/1000)
     
 
 def cam_to_world(cam_point, world_to_cam):
