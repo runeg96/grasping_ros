@@ -117,7 +117,7 @@ if __name__ == '__main__':
             depth = depth_image[grasps[0].center[0]][grasps[0].center[1]]
             grasp_point = pixel_to_camera(cam_info,(grasps[0].center[0],grasps[0].center[1]),depth/1000)
 
-            m_width = width_pixel_to_m(grasps[0].width, depth, cam_info)
+            m_width = width_pixel_to_m(grasps[0].width, depth/1000, cam_info)
             print("JANS NON-STUPID CONVERSION?: ",m_width)
             print("GR width: ",grasps[0].width)
             print("Depth: ", depth/1000, " Meters")
