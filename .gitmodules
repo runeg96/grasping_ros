@@ -31,3 +31,6 @@
 [submodule "src/grasp_multiObject_multiGrasp"]
 	path = src/grasp_multiObject_multiGrasp
 	url = https://github.com/ivalab/grasp_multiObject_multiGrasp.git
+[submodule "src/vgn"]
+	path = src/vgn
+	url = https://github.com/runeg96/vgn.git
