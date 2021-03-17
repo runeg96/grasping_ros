@@ -7,7 +7,7 @@ FOCAL_D345 = 1.93 #mm
 
 def width_pixel_to_m(width_pixel, depth_m, cam_info):
     fovx = 2 *math.atan(cam_info.width / 2 * cam_info.K[0])
-    return width_pixel / cam_info.width * 2 * depth_m * math.tan(fovx/2)
+    return (2 * depth_m * math.tan(fovx/2)) / cam_info.width * width_pixel
 
 
 def new_width_pixel_to_m(width_pixel, center, angle, cam_info):
