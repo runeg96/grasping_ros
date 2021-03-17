@@ -1,4 +1,6 @@
 #! /usr/bin/env python3
+""" ROS implementation of gr_grasp
+"""
 
 import os
 import sys

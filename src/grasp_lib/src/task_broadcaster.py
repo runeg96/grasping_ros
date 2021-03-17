@@ -1,4 +1,10 @@
 #! /usr/bin/env python
+
+'''
+Companion script for vgn
+Makes a new tf frame 'task' which is needed for vgn
+'''
+
 import rospy
 import tf2_ros
 from geometry_msgs.msg import TransformStamped

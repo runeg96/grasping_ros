@@ -18,8 +18,7 @@ img_color = cvbridge.imgmsg_to_cv2(msg_color, desired_encoding="passthrough")
 print(img_color.dtype)
 cv.imwrite("Color.png", img_color)
 
-msg_depth = rospy.wait_for_message(
-    "/ptu_camera/camera/depth/image_rect_raw", Image, rospy.Duration(1))
+msg_depth = rospy.wait_for_message("/ptu_camera/camera/depth/image_rect_raw", Image, rospy.Duration(1))
 img_depth = cvbridge.imgmsg_to_cv2(msg_color, desired_encoding="passthrough")
 print(img_depth.dtype)
 cv.imwrite("Depth2.png", img_depth)
