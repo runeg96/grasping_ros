@@ -13,7 +13,7 @@ import logging
 import numpy as np
 import torch.utils.data
 
-from grasp_utils.utils import pixel_to_camera, new_width_pixel_to_m
+from grasp_utils.utils import pixel_to_camera, width_pixel_to_m
 from ggcnn.msg import Grasp
 
 from sensor_msgs.msg import Image, CameraInfo
@@ -117,7 +117,7 @@ if __name__ == '__main__':
             depth = depth_image[grasps[0].center[0]][grasps[0].center[1]]
             grasp_point = pixel_to_camera(cam_info,(grasps[0].center[0],grasps[0].center[1]),depth/1000)
 
-            m_width = new_width_pixel_to_m(grasps[0].width, grasps[0].center, grasps[0].angle, cam_info)
+            m_width = width_pixel_to_m(grasps[0].width, depth, cam_info)
             print("JANS NON-STUPID CONVERSION?: ",m_width)
             print("GR width: ",grasps[0].width)
             print("Depth: ", depth/1000, " Meters")
