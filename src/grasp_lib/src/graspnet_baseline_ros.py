@@ -1,6 +1,5 @@
 #! /usr/bin/env python3
 """ ROS implementation of graspnet_baseline demo
-    Author: Jan Kjaer Joorgensen and Rune
 """
 
 import os
