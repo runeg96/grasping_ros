@@ -7,29 +7,28 @@ from cv_bridge import CvBridge
 import tf.msg
 
 from sensor_msgs.msg import Image, CameraInfo
-from visualization_msgs.msg import Marker, MarkerArray
+from visualization_msgs.msg import Marker
 from geometry_msgs.msg import TransformStamped, Point
-from image_geometry import PinholeCameraModel
 from tf.transformations import euler_from_quaternion
 import numpy as np
 
-from grasp_utils.utils import width_m_to_pixel
+from grasp_utils.utils import width_m_to_pixel, camera_to_pixel
 
 from ggcnn.msg import Grasp
 
 img = np.zeros((480,640))
+depth = np.zeros((480,640))
 
-def draw_grasp(grasp, image, depth, camModel, debug=False):
-    global ci
+def draw_grasp(grasp, image, depth, camInfo):
     Points = list()
 
     # Project point to image plane (grasp center)
-    grasp_center = PinholeCameraModel.project3dToPixel(camModel, [grasp.pose.position.x, grasp.pose.position.y, grasp.pose.position.z])
+    grasp_center = camera_to_pixel(camInfo, [grasp.pose.position.x, grasp.pose.position.y, grasp.pose.position.z])
     Points.append(grasp_center)
 
     # Index depth and convert m to pixel (width)
     depth_m = depth[int(grasp_center[0])][int(grasp_center[1])]
-    width_img = width_m_to_pixel(grasp.width, depth_m, ci)
+    width_img = width_m_to_pixel(grasp.width, depth_m, camInfo) / 2
 
     # Get yaw from quaternion
     angle = euler_from_quaternion([grasp.pose.orientation.x, grasp.pose.orientation.y, grasp.pose.orientation.z, grasp.pose.orientation.w])
@@ -49,11 +48,6 @@ def draw_grasp(grasp, image, depth, camModel, debug=False):
     img_msg = bridge.cv2_to_imgmsg(im_rgb, encoding="passthrough")
     image_pub.publish(img_msg)
 
-    # Show images in opencv window for debug
-    if debug:
-        cv.imshow("grasp", im_rgb)
-        cv.waitKey(10000)
-        cv.destroyAllWindows()
 
 
 def create_grasp_markers(new_grasp, type="gripper"):
@@ -129,7 +123,7 @@ def depth_callback(msg):
 
 
 def grasp_callback(msg):
-    global img, cam, depth
+    global img, depth, ci
 
     # Setting up grasping frame
     t = TransformStamped()
@@ -145,8 +139,7 @@ def grasp_callback(msg):
     create_grasp_markers(msg)
 
     if rospy.get_param('~options/draw_image'):
-        draw_grasp(msg, img, depth, cam, debug=False)
-
+        draw_grasp(msg, img, depth, ci)
 
 
 
@@ -164,8 +157,6 @@ if __name__ == '__main__':
 
         # Load camera info
         ci = rospy.wait_for_message(rospy.get_param('~camera/info_topic'), CameraInfo, timeout=None)
-        cam = PinholeCameraModel()
-        cam.fromCameraInfo(ci)
 
         rospy.Subscriber(rospy.get_param('~~camera/color_topic'), Image, image_callback)
         rospy.Subscriber(rospy.get_param('~~camera/depth_topic'), Image, depth_callback)
