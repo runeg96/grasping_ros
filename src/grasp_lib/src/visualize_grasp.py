@@ -17,9 +17,6 @@ from tf.transformations import euler_from_quaternion
 from grasp_utils.utils import width_m_to_pixel, camera_to_pixel
 
 
-img = np.zeros((480,640))
-depth = np.zeros((480,640))
-
 def draw_grasp(grasp, image, depth, camInfo):
     Points = list()
 
@@ -28,7 +25,7 @@ def draw_grasp(grasp, image, depth, camInfo):
     Points.append(grasp_center)
 
     # Index depth and convert m to pixel (width)
-    depth_m = depth[int(grasp_center[0])][int(grasp_center[1])]
+    depth_m = depth[int(grasp_center[1])][int(grasp_center[0])]
     width_img = width_m_to_pixel(grasp.width, depth_m, camInfo) / 2
 
     # Get yaw from quaternion
@@ -42,7 +39,15 @@ def draw_grasp(grasp, image, depth, camInfo):
     # Draw points
     for point in Points:
         point = (int(x) for x in point)
-        cv.circle(image, tuple(point), 5, (0, 0, 255), -1)
+
+        point = list(point)
+        #Make sure points stay within image
+        point[0] = point[0] if point[0] < camInfo.width else camInfo.width -1
+        point[1] = point[1] if point[1] < camInfo.height else camInfo.height -1
+        point[0] = point[0] if point[0] > 0 else 1
+        point[1] = point[1] if point[1] > 0 else 1
+ 
+        cv.circle(image, tuple(point), 11, (0, 0, 255), -1)
 
     im_rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
 
@@ -152,12 +157,15 @@ if __name__ == '__main__':
     marker_pub = rospy.Publisher(rospy.get_param('~output/marker_topic'), Marker, queue_size=10)
     tf_pub = rospy.Publisher('/tf', tf.msg.tfMessage, queue_size=1)
 
+    # Load camera info
+    ci = rospy.wait_for_message(rospy.get_param('~camera/info_topic'), CameraInfo, timeout=None)
+
+    img = np.ones((ci.height, ci.width))
+    depth = np.ones((ci.height, ci.width))
+    
     # if draw_image = True
     if rospy.get_param('~options/draw_image'):
         bridge = CvBridge()
-
-        # Load camera info
-        ci = rospy.wait_for_message(rospy.get_param('~camera/info_topic'), CameraInfo, timeout=None)
 
         rospy.Subscriber(rospy.get_param('~~camera/color_topic'), Image, image_callback)
         rospy.Subscriber(rospy.get_param('~~camera/depth_topic'), Image, depth_callback)
