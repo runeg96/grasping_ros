@@ -36,8 +36,16 @@ def draw_grasp(grasp, image, depth, camInfo):
     Points.append((grasp_center[0]-math.cos(yaw)*width_img, grasp_center[1]-math.sin(yaw)*width_img))
     Points.append((grasp_center[0]+math.cos(yaw)*width_img, grasp_center[1]+math.sin(yaw)*width_img))
 
+    # Calculate rectangle bounds
+    x = (0.4 * width_img * math.cos(yaw-math.pi/2)*width_img) / width_img
+    y = (0.4 * width_img * math.sin(yaw-math.pi/2)*width_img) / width_img
+    Points.append((Points[1][0]+x, Points[1][1]+y))
+    Points.append((Points[1][0]-x, Points[1][1]-y))
+    Points.append((Points[2][0]-x, Points[2][1]-y))
+    Points.append((Points[2][0]+x, Points[2][1]+y))
+
     # Draw points
-    for point in Points:
+    for point in Points[0:3]:
         point = (int(x) for x in point)
 
         point = list(point)
@@ -49,6 +57,9 @@ def draw_grasp(grasp, image, depth, camInfo):
  
         cv.circle(image, tuple(point), 11, (0, 0, 255), -1)
 
+    # Draw rectangle
+    cv.drawContours(image, [np.array(Points[3:]).astype(int)], 0, (255,0,0), 5)
+    
     im_rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
 
     img_msg = bridge.cv2_to_imgmsg(im_rgb, encoding="passthrough")
@@ -144,7 +155,7 @@ def grasp_callback(msg):
 
     create_grasp_markers(msg)
 
-    if rospy.get_param('~options/draw_image'):
+    if rospy.get_param('~options/draw_image') and img is not None and depth is not None:
         draw_grasp(msg, img, depth, ci)
 
 
@@ -160,8 +171,7 @@ if __name__ == '__main__':
     # Load camera info
     ci = rospy.wait_for_message(rospy.get_param('~camera/info_topic'), CameraInfo, timeout=None)
 
-    img = np.ones((ci.height, ci.width))
-    depth = np.ones((ci.height, ci.width))
+    img, depth = None, None
     
     # if draw_image = True
     if rospy.get_param('~options/draw_image'):
