@@ -2,19 +2,20 @@
 
 import rospy
 import math
+import numpy as np
 import cv2 as cv
 from cv_bridge import CvBridge
 import tf.msg
+
+from ggcnn.msg import Grasp
 
 from sensor_msgs.msg import Image, CameraInfo
 from visualization_msgs.msg import Marker
 from geometry_msgs.msg import TransformStamped, Point
 from tf.transformations import euler_from_quaternion
-import numpy as np
 
 from grasp_utils.utils import width_m_to_pixel, camera_to_pixel
 
-from ggcnn.msg import Grasp
 
 img = np.zeros((480,640))
 depth = np.zeros((480,640))
