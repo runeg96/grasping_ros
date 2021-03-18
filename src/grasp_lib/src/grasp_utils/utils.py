@@ -13,7 +13,7 @@ def width_pixel_to_m(width_pixel, depth_m, cameraInfo):
     depth_m     -- float depth in meters
     cameraInfo  -- sensor_msgs/CameraInfo
     """
-    
+
     fovx = 2 * math.atan(cameraInfo.width / (2 * cameraInfo.K[0]))
     return (2 * depth_m * math.tan(fovx/2)) / cameraInfo.width * width_pixel
 
@@ -91,7 +91,7 @@ def camera_to_pixel(cameraInfo, point):
     _intrinsics.fy = cameraInfo.K[4]
     
     _intrinsics.model  = rs.distortion.none
-    _intrinsics.coeffs = [i for i in cameraInfo.D]
+    # _intrinsics.coeffs = [i for i in cameraInfo.D]
     result = rs.rs2_project_point_to_pixel(_intrinsics, point)
 
     return result
