@@ -12,7 +12,7 @@ from ggcnn.msg import Grasp
 from sensor_msgs.msg import Image, CameraInfo
 from visualization_msgs.msg import Marker
 from geometry_msgs.msg import TransformStamped, Point
-from tf.transformations import euler_from_quaternion
+from tf.transformations import euler_from_quaternion, quaternion_from_euler, quaternion_multiply
 
 from grasp_utils.utils import width_m_to_pixel, camera_to_pixel
 
@@ -148,7 +148,15 @@ def grasp_callback(msg):
     t.header.stamp = rospy.Time.now()
     t.child_frame_id = 'grasp'
     t.transform.translation = msg.pose.position
-    t.transform.rotation = msg.pose.orientation
+
+    q = msg.pose.orientation
+    q_rot = quaternion_from_euler(math.pi/2, math.pi/2, 0)
+    q_new = quaternion_multiply(q_rot, [q.x, q.y, q.z, q.w])
+
+    t.transform.rotation.x = q_new[0]
+    t.transform.rotation.y = q_new[1]
+    t.transform.rotation.z = q_new[2]
+    t.transform.rotation.w = q_new[3]
 
     tfm = tf.msg.tfMessage([t])
     tf_pub.publish(tfm)
