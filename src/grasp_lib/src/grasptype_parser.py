@@ -7,7 +7,7 @@ import tf2_geometry_msgs
 from tf.transformations import quaternion_from_euler
 
 from std_msgs.msg import Float32MultiArray
-from geometry_msgs import PoseStamped
+from geometry_msgs.msg import PoseStamped
 from grasp_lib.msg import Grasp
 
 def gg_callback(msg):
@@ -29,10 +29,9 @@ def gg_callback(msg):
     new_grasp.pose.orientation.w = q[3]
 
 
-    new_grasp.width_meters = msg.data[4]/1000
+    new_grasp.width_meter = msg.data[4]/1000
 
     new_grasp.quality = -1.0 # Unknown
-    print(new_grasp)
     grasp_pub.publish(new_grasp)
 
 def vgn_callback(msg):
@@ -44,12 +43,12 @@ def vgn_callback(msg):
 
     pose_stamp = PoseStamped()
     pose_stamp.header.frame_id = "task"
-    pose_stamp.pose = msg.pose    
+    pose_stamp.pose = msg.pose
 
     pose_transformed = tf2_geometry_msgs.do_transform_pose(pose_stamp, transform)
 
-    msg.pose = pose_transformed.pose    
-    
+    msg.pose = pose_transformed.pose
+
     grasp_pub.publish(msg)
 
 
@@ -61,5 +60,5 @@ tf_listener = tf2_ros.TransformListener(tf_buffer)
 grasp_pub = rospy.Publisher(rospy.get_param("visualize_grasp/input/grasp_topic"), Grasp, queue_size=1)
 
 rospy.Subscriber('ggcnn/out/command', Float32MultiArray, gg_callback)
-rospy.Subscriber('RUNE PUT TOPIC HERE', Grasp, vgn_callback)
+rospy.Subscriber("vgn/output", Grasp, vgn_callback)
 rospy.spin()
