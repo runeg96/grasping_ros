@@ -150,13 +150,15 @@ def fill_grasp(grasp):
 
 
     # Construct 3D pose from 2D
-    if grasp.pose.x == 0.0 and grasp.pose.y == 0.0 and grasp.pose.z == 0.0:
-        depth_m = depth[int(grasp.pose2D.x)][int(grasp.pose2D.x)] / 1000
+    if grasp.pose.position.x == 0.0 and grasp.pose.position.y == 0.0 and grasp.pose.position.z == 0.0:
+        print("depth shape: ", depth.shape)
+        depth_m = depth[int(grasp.pose2D.y)][int(grasp.pose2D.x)] / 1000
 
-        grasp_point = pixel_to_camera(ci,(grasp.pose2D.x, grasp.pose2D.x), depth_m)
-        grasp.pose.x = grasp_point[0]
-        grasp.pose.y = grasp_point[1]
-        grasp.pose.z = grasp_point[2]
+
+        grasp_point = pixel_to_camera(ci,(grasp.pose2D.x, grasp.pose2D.y), depth_m)
+        grasp.pose.position.x = grasp_point[0]
+        grasp.pose.position.y = grasp_point[1]
+        grasp.pose.position.z = grasp_point[2]
 
         rot = Rotation.from_euler('xyz', [0, 0, grasp.pose2D.theta])
         q = rot.as_quat()
@@ -171,7 +173,7 @@ def fill_grasp(grasp):
         grasp.width_pixel = width_m_to_pixel(grasp.width_m, depth_m, ci) / 2
     if grasp.width_meter == 0.0:
         grasp.width_meter = width_pixel_to_m(grasp.width_pixel, depth_m, ci)
-
+    # print(grasp)
     return grasp
 
 
