@@ -10,31 +10,25 @@ import tf.msg
 # from ggcnn.msg import Grasp
 from grasp_lib.msg import Grasp
 
+from scipy.spatial.transform import Rotation
+
 from sensor_msgs.msg import Image, CameraInfo
 from visualization_msgs.msg import Marker
 from geometry_msgs.msg import TransformStamped, Point
 from tf.transformations import euler_from_quaternion, quaternion_from_euler, quaternion_multiply
 
-from grasp_utils.utils import width_m_to_pixel, camera_to_pixel
+from grasp_utils.utils import width_m_to_pixel, width_pixel_to_m, camera_to_pixel, pixel_to_camera
 
 
-def draw_grasp(grasp, image, depth, camInfo):
+def draw_grasp(grasp, image, camInfo):
     Points = list()
 
     # Project point to image plane (grasp center)
-    grasp_center = camera_to_pixel(camInfo, [grasp.pose.position.x, grasp.pose.position.y, grasp.pose.position.z])
+    grasp_center = (grasp.pose2D.x, grasp.pose2D.y)
     Points.append(grasp_center)
 
-    # Index depth and convert m to pixel (width)
-    depth_m = depth[int(grasp_center[0])][int(grasp_center[1])] / 1000
-    print("Depth: ",depth_m)
-    width_img = width_m_to_pixel(grasp.width, depth_m, camInfo) / 2
-    print("WIDTH: ",width_img)
-    # width_img = 200
-
-    # Get yaw from quaternion
-    angle = euler_from_quaternion([grasp.pose.orientation.x, grasp.pose.orientation.y, grasp.pose.orientation.z, grasp.pose.orientation.w])
-    yaw = angle[2]
+    width_img = grasp.width_pixel
+    yaw = grasp.pose
 
     # Calculate end points of gripper fingers (based on width and angle)
     Points.append((grasp_center[0]-math.cos(yaw)*width_img, grasp_center[1]-math.sin(yaw)*width_img))
@@ -73,7 +67,7 @@ def draw_grasp(grasp, image, depth, camInfo):
 
 def create_grasp_markers(new_grasp, type="gripper"):
 
-    width_m = new_grasp.width
+    width_m = new_grasp.width_meter
     depth = 0.06
 
     grasp_marker = Marker()
@@ -142,9 +136,47 @@ def depth_callback(msg):
     global depth
     depth = bridge.imgmsg_to_cv2(msg, desired_encoding='32FC1')
 
+def fill_grasp(grasp):
+    global ci, depth
+    
+    # Construct 2D pose from 3D
+    grasp_center = camera_to_pixel(ci, [grasp.pose.position.x, grasp.pose.position.y, grasp.pose.position.z])
+    grasp.pose2D.x = grasp_center[0]
+    grasp.pose2D.y = grasp_center[1]
+
+    angle = euler_from_quaternion([grasp.pose.orientation.x, grasp.pose.orientation.y, grasp.pose.orientation.z, grasp.pose.orientation.w])
+    grasp.pose2D.theta = angle[2]
+
+
+    # Construct 3D pose from 2D
+    depth_m = depth[int(grasp.pose2D.x)][int(grasp.pose2D.x)] / 1000
+
+    grasp_point = pixel_to_camera(ci,(grasp.pose2D.x, grasp.pose2D.x), depth_m)
+    grasp.pose.x = grasp_point[0]
+    grasp.pose.y = grasp_point[1]
+    grasp.pose.z = grasp_point[2]
+
+    rot = Rotation.from_euler('xyz', [0, 0, grasp.pose2D.theta])
+    q = rot.as_quat()
+    grasp.pose.orientation.x = q[0]
+    grasp.pose.orientation.y = q[1]
+    grasp.pose.orientation.z = q[2]
+    grasp.pose.orientation.w = q[3]
+
+
+    # Width conversions
+    grasp.width_pixel = width_m_to_pixel(grasp.width_m, depth_m, ci) / 2
+
+    grasp.width_meter = width_pixel_to_m(grasp.width_pixel, depth_m, ci)
+
+    return grasp
+    
+
 
 def grasp_callback(msg):
     global img, depth, ci
+
+    msg = fill_grasp(msg)
 
     # Setting up grasping frame
     t = TransformStamped()
@@ -167,8 +199,8 @@ def grasp_callback(msg):
 
     create_grasp_markers(msg)
 
-    if rospy.get_param('~options/draw_image') and img is not None and depth is not None:
-        draw_grasp(msg, img, depth, ci)
+    if rospy.get_param('~options/draw_image') and img is not None:
+        draw_grasp(msg, img, ci)
 
 
 
