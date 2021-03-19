@@ -138,7 +138,7 @@ def depth_callback(msg):
 
 def fill_grasp(grasp):
     global ci, depth
-    
+
     # Construct 2D pose from 3D
     if grasp.pose2D.x == 0.0 and grasp.pose2D.y == 0.0:
         grasp_center = camera_to_pixel(ci, [grasp.pose.position.x, grasp.pose.position.y, grasp.pose.position.z])
@@ -150,7 +150,7 @@ def fill_grasp(grasp):
 
 
     # Construct 3D pose from 2D
-    if grasp.pose.x == 0.0 and grasp.pose.y == 0.0 and grasp.pose.z == 0.0: 
+    if grasp.pose.x == 0.0 and grasp.pose.y == 0.0 and grasp.pose.z == 0.0:
         depth_m = depth[int(grasp.pose2D.x)][int(grasp.pose2D.x)] / 1000
 
         grasp_point = pixel_to_camera(ci,(grasp.pose2D.x, grasp.pose2D.x), depth_m)
@@ -173,13 +173,13 @@ def fill_grasp(grasp):
         grasp.width_meter = width_pixel_to_m(grasp.width_pixel, depth_m, ci)
 
     return grasp
-    
+
 
 
 def grasp_callback(msg):
     global img, depth, ci
 
-    msg = fill_grasp(msg)
+    # msg = fill_grasp(msg)
 
     # Setting up grasping frame
     t = TransformStamped()

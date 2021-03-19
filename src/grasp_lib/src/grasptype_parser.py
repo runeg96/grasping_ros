@@ -6,8 +6,7 @@ import rospy
 from tf.transformations import quaternion_from_euler
 
 from std_msgs.msg import Float32MultiArray
-from ggcnn.msg import Grasp
-
+from grasp_lib.msg import Grasp
 
 def gg_callback(msg):
     '''
@@ -28,7 +27,7 @@ def gg_callback(msg):
     new_grasp.pose.orientation.w = q[3]
 
 
-    new_grasp.width = msg.data[4]/1000
+    new_grasp.width_meters = msg.data[4]/1000
 
     new_grasp.quality = -1.0 # Unknown
     print(new_grasp)
