@@ -16,7 +16,7 @@ import numpy as np
 import torch.utils.data
 
 from grasp_utils.utils import pixel_to_camera, width_pixel_to_m
-from ggcnn.msg import Grasp
+from grasp_lib.msg import Grasp
 
 from sensor_msgs.msg import Image, CameraInfo
 from scipy.spatial.transform import Rotation
@@ -50,24 +50,14 @@ def numpy_to_torch(s):
     else:
         return torch.from_numpy(s.astype(np.float32))
 
-def parse_grasp_to_rviz(grasp_point, width, quality, angle):
+def parse_grasp_to_rviz(grasp_center, width_pixel, quality, angle):
         vis_grasp = Grasp()
-        vis_grasp.pose.position.x = grasp_point[0]
-        vis_grasp.pose.position.y = grasp_point[1]
-        vis_grasp.pose.position.z = grasp_point[2]
-
-        # Create a rotation object from Euler angles
-        rot = Rotation.from_euler('xyz', [0, 0, angle])
-
-        # Convert to quaternions
-        q = rot.as_quat()
-
-        vis_grasp.pose.orientation.x = q[0]
-        vis_grasp.pose.orientation.y = q[1]
-        vis_grasp.pose.orientation.z = q[2]
-        vis_grasp.pose.orientation.w = q[3]
+        vis_grasp.name = "GR"
+        vis_grasp.pose2D.x = grasp_center[1]
+        vis_grasp.pose2D.y = grasp_center[0]
+        vis_grasp.pose2D.theta = angle
+        vis_grasp.width_pixel = width_pixel
         vis_grasp.quality = quality
-        vis_grasp.width = width
         grasp_pub.publish(vis_grasp)
 
 
@@ -84,11 +74,7 @@ if __name__ == '__main__':
     args = parse_args()
 
     rospy.init_node("gr_grasp_ros")
-
     grasp_pub = rospy.Publisher(rospy.get_param("visualize_grasp/input/grasp_topic"), Grasp, queue_size=1)
-    # img_pub = rospy.Publisher("gr_grasp/image", Image, queue_size=1)
-
-    cam_info = rospy.wait_for_message('ptu_camera/camera/color/camera_info', CameraInfo, timeout=rospy.Duration(1))
 
     # Load Network
     logging.info('Loading model...')
@@ -116,9 +102,4 @@ if __name__ == '__main__':
 
             q_img, ang_img, width_img = post_process_output(pred['pos'], pred['cos'], pred['sin'], pred['width'])
             grasps = detect_grasps(q_img, ang_img, width_img)
-            depth = depth_image[grasps[0].center[0]][grasps[0].center[1]]
-            grasp_point = pixel_to_camera(cam_info,(grasps[0].center[0],grasps[0].center[1]),depth/1000)
-
-            m_width = width_pixel_to_m(grasps[0].width, depth/1000, cam_info)
-
-            parse_grasp_to_rviz(grasp_point, m_width, grasps[0].quality, grasps[0].angle)
+            parse_grasp_to_rviz(grasps[0].center,grasps[0].width, grasps[0].quality, grasps[0].angle)
