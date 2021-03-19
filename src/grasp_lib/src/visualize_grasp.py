@@ -53,11 +53,14 @@ def draw_grasp(grasp, image, camInfo):
         point[0] = point[0] if point[0] > 0 else 1
         point[1] = point[1] if point[1] > 0 else 1
 
-        cv.circle(image, tuple(point), 11, (0, 0, 255), -1)
+        cv.circle(image, tuple(point), camInfo.height/180*3, (0, 0, 255), -1)
 
     # Draw rectangle
-    cv.drawContours(image, [np.array(Points[3:]).astype(int)], 0, (255,0,0), 2)
+    cv.drawContours(image, [np.array(Points[3:]).astype(int)], 0, (255,0,0), camInfo.height/180)
 
+
+    cv.putText(image,'Q: ' + str(grasp.quality), (10,75), cv.FONT_HERSHEY_PLAIN, camInfo.height/120,(255,255,255), camInfo.height/200)
+    
     im_rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
 
     img_msg = bridge.cv2_to_imgmsg(im_rgb, encoding="passthrough")
@@ -139,6 +142,7 @@ def depth_callback(msg):
 def fill_grasp(grasp):
     global ci, depth
 
+
     # Construct 2D pose from 3D
     if grasp.pose2D.x == 0.0 and grasp.pose2D.y == 0.0:
         grasp_center = camera_to_pixel(ci, [grasp.pose.position.x, grasp.pose.position.y, grasp.pose.position.z])
@@ -148,13 +152,10 @@ def fill_grasp(grasp):
         angle = euler_from_quaternion([grasp.pose.orientation.x, grasp.pose.orientation.y, grasp.pose.orientation.z, grasp.pose.orientation.w])
         grasp.pose2D.theta = angle[2]
 
+    depth_m = depth[int(grasp.pose2D.y)][int(grasp.pose2D.x)] / 1000
 
     # Construct 3D pose from 2D
     if grasp.pose.position.x == 0.0 and grasp.pose.position.y == 0.0 and grasp.pose.position.z == 0.0:
-        print("depth shape: ", depth.shape)
-        depth_m = depth[int(grasp.pose2D.y)][int(grasp.pose2D.x)] / 1000
-
-
         grasp_point = pixel_to_camera(ci,(grasp.pose2D.x, grasp.pose2D.y), depth_m)
         grasp.pose.position.x = grasp_point[0]
         grasp.pose.position.y = grasp_point[1]
@@ -181,31 +182,32 @@ def fill_grasp(grasp):
 def grasp_callback(msg):
     global img, depth, ci
 
-    msg = fill_grasp(msg)
+    if depth is not None:
+        msg = fill_grasp(msg)
 
-    # Setting up grasping frame
-    t = TransformStamped()
-    t.header.frame_id = rospy.get_param('~grasp/grasp_frame')
-    t.header.stamp = rospy.Time.now()
-    t.child_frame_id = 'grasp'
-    t.transform.translation = msg.pose.position
+        # Setting up grasping frame
+        t = TransformStamped()
+        t.header.frame_id = rospy.get_param('~grasp/grasp_frame')
+        t.header.stamp = rospy.Time.now()
+        t.child_frame_id = 'grasp'
+        t.transform.translation = msg.pose.position
 
-    q = msg.pose.orientation
-    q_rot = quaternion_from_euler(math.pi/2, math.pi/2, 0)
-    q_new = quaternion_multiply(q_rot, [q.x, q.y, q.z, q.w])
+        q = msg.pose.orientation
+        q_rot = quaternion_from_euler(math.pi/2, math.pi/2, 0)
+        q_new = quaternion_multiply(q_rot, [q.x, q.y, q.z, q.w])
 
-    t.transform.rotation.x = q_new[0]
-    t.transform.rotation.y = q_new[1]
-    t.transform.rotation.z = q_new[2]
-    t.transform.rotation.w = q_new[3]
+        t.transform.rotation.x = q_new[0]
+        t.transform.rotation.y = q_new[1]
+        t.transform.rotation.z = q_new[2]
+        t.transform.rotation.w = q_new[3]
 
-    tfm = tf.msg.tfMessage([t])
-    tf_pub.publish(tfm)
+        tfm = tf.msg.tfMessage([t])
+        tf_pub.publish(tfm)
 
-    create_grasp_markers(msg)
+        create_grasp_markers(msg)
 
-    if rospy.get_param('~options/draw_image') and img is not None:
-        draw_grasp(msg, img, ci)
+        if rospy.get_param('~options/draw_image') and img is not None:
+            draw_grasp(msg, img, ci)
 
 
 
