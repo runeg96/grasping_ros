@@ -179,7 +179,7 @@ def fill_grasp(grasp):
 def grasp_callback(msg):
     global img, depth, ci
 
-    # msg = fill_grasp(msg)
+    msg = fill_grasp(msg)
 
     # Setting up grasping frame
     t = TransformStamped()
