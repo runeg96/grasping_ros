@@ -7,7 +7,8 @@ import cv2 as cv
 from cv_bridge import CvBridge
 import tf.msg
 
-from ggcnn.msg import Grasp
+# from ggcnn.msg import Grasp
+from grasp_lib.msg import Grasp
 
 from sensor_msgs.msg import Image, CameraInfo
 from visualization_msgs.msg import Marker
@@ -25,8 +26,11 @@ def draw_grasp(grasp, image, depth, camInfo):
     Points.append(grasp_center)
 
     # Index depth and convert m to pixel (width)
-    depth_m = depth[int(grasp_center[1])][int(grasp_center[0])]
+    depth_m = depth[int(grasp_center[0])][int(grasp_center[1])] / 1000
+    print("Depth: ",depth_m)
     width_img = width_m_to_pixel(grasp.width, depth_m, camInfo) / 2
+    print("WIDTH: ",width_img)
+    # width_img = 200
 
     # Get yaw from quaternion
     angle = euler_from_quaternion([grasp.pose.orientation.x, grasp.pose.orientation.y, grasp.pose.orientation.z, grasp.pose.orientation.w])
@@ -54,12 +58,12 @@ def draw_grasp(grasp, image, depth, camInfo):
         point[1] = point[1] if point[1] < camInfo.height else camInfo.height -1
         point[0] = point[0] if point[0] > 0 else 1
         point[1] = point[1] if point[1] > 0 else 1
- 
+
         cv.circle(image, tuple(point), 11, (0, 0, 255), -1)
 
     # Draw rectangle
-    cv.drawContours(image, [np.array(Points[3:]).astype(int)], 0, (255,0,0), 5)
-    
+    cv.drawContours(image, [np.array(Points[3:]).astype(int)], 0, (255,0,0), 2)
+
     im_rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
 
     img_msg = bridge.cv2_to_imgmsg(im_rgb, encoding="passthrough")
@@ -136,7 +140,7 @@ def image_callback(msg):
 
 def depth_callback(msg):
     global depth
-    depth = bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
+    depth = bridge.imgmsg_to_cv2(msg, desired_encoding='32FC1')
 
 
 def grasp_callback(msg):
@@ -180,7 +184,7 @@ if __name__ == '__main__':
     ci = rospy.wait_for_message(rospy.get_param('~camera/info_topic'), CameraInfo, timeout=None)
 
     img, depth = None, None
-    
+
     # if draw_image = True
     if rospy.get_param('~options/draw_image'):
         bridge = CvBridge()
