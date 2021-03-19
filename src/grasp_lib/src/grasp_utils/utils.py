@@ -69,7 +69,7 @@ def pixel_to_camera(cameraInfo, pixel, depth):
     _intrinsics.fy = cameraInfo.K[4]
     
     _intrinsics.model  = rs.distortion.none
-    _intrinsics.coeffs = [i for i in cameraInfo.D]
+    # _intrinsics.coeffs = [i for i in cameraInfo.D]
     x,y = pixel
     result = rs.rs2_deproject_pixel_to_point(_intrinsics, [x,y], depth)
 
