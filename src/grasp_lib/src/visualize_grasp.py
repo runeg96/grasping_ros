@@ -23,12 +23,12 @@ from grasp_utils.utils import width_m_to_pixel, width_pixel_to_m, camera_to_pixe
 def draw_grasp(grasp, image, camInfo):
     Points = list()
 
-    # Project point to image plane (grasp center)
+    # Unloading grasp msg
     grasp_center = (grasp.pose2D.x, grasp.pose2D.y)
     Points.append(grasp_center)
 
     width_img = grasp.width_pixel
-    yaw = grasp.pose
+    yaw = grasp.pose2D.theta
 
     # Calculate end points of gripper fingers (based on width and angle)
     Points.append((grasp_center[0]-math.cos(yaw)*width_img, grasp_center[1]-math.sin(yaw)*width_img))
@@ -140,34 +140,37 @@ def fill_grasp(grasp):
     global ci, depth
     
     # Construct 2D pose from 3D
-    grasp_center = camera_to_pixel(ci, [grasp.pose.position.x, grasp.pose.position.y, grasp.pose.position.z])
-    grasp.pose2D.x = grasp_center[0]
-    grasp.pose2D.y = grasp_center[1]
+    if grasp.pose2D.x == 0.0 and grasp.pose2D.y == 0.0:
+        grasp_center = camera_to_pixel(ci, [grasp.pose.position.x, grasp.pose.position.y, grasp.pose.position.z])
+        grasp.pose2D.x = grasp_center[0]
+        grasp.pose2D.y = grasp_center[1]
 
-    angle = euler_from_quaternion([grasp.pose.orientation.x, grasp.pose.orientation.y, grasp.pose.orientation.z, grasp.pose.orientation.w])
-    grasp.pose2D.theta = angle[2]
+        angle = euler_from_quaternion([grasp.pose.orientation.x, grasp.pose.orientation.y, grasp.pose.orientation.z, grasp.pose.orientation.w])
+        grasp.pose2D.theta = angle[2]
 
 
     # Construct 3D pose from 2D
-    depth_m = depth[int(grasp.pose2D.x)][int(grasp.pose2D.x)] / 1000
+    if grasp.pose.x == 0.0 and grasp.pose.y == 0.0 and grasp.pose.z == 0.0: 
+        depth_m = depth[int(grasp.pose2D.x)][int(grasp.pose2D.x)] / 1000
 
-    grasp_point = pixel_to_camera(ci,(grasp.pose2D.x, grasp.pose2D.x), depth_m)
-    grasp.pose.x = grasp_point[0]
-    grasp.pose.y = grasp_point[1]
-    grasp.pose.z = grasp_point[2]
+        grasp_point = pixel_to_camera(ci,(grasp.pose2D.x, grasp.pose2D.x), depth_m)
+        grasp.pose.x = grasp_point[0]
+        grasp.pose.y = grasp_point[1]
+        grasp.pose.z = grasp_point[2]
 
-    rot = Rotation.from_euler('xyz', [0, 0, grasp.pose2D.theta])
-    q = rot.as_quat()
-    grasp.pose.orientation.x = q[0]
-    grasp.pose.orientation.y = q[1]
-    grasp.pose.orientation.z = q[2]
-    grasp.pose.orientation.w = q[3]
+        rot = Rotation.from_euler('xyz', [0, 0, grasp.pose2D.theta])
+        q = rot.as_quat()
+        grasp.pose.orientation.x = q[0]
+        grasp.pose.orientation.y = q[1]
+        grasp.pose.orientation.z = q[2]
+        grasp.pose.orientation.w = q[3]
 
 
     # Width conversions
-    grasp.width_pixel = width_m_to_pixel(grasp.width_m, depth_m, ci) / 2
-
-    grasp.width_meter = width_pixel_to_m(grasp.width_pixel, depth_m, ci)
+    if grasp.width_pixel == 0.0:
+        grasp.width_pixel = width_m_to_pixel(grasp.width_m, depth_m, ci) / 2
+    if grasp.width_meter == 0.0:
+        grasp.width_meter = width_pixel_to_m(grasp.width_pixel, depth_m, ci)
 
     return grasp
     
