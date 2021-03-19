@@ -14,7 +14,7 @@ from PIL import Image
 
 import torch
 from graspnetAPI import GraspGroup
-from ggcnn.msg import Grasp
+from grasp_lib.msg import Grasp
 
 from scipy.spatial.transform import Rotation as R
 
@@ -148,8 +148,8 @@ def grasp_paser(gg):
     vis_grasp.pose.orientation.z = q[2]
     vis_grasp.pose.orientation.w = q[3]
     vis_grasp.quality = gg.score
-    vis_grasp.width = gg.width
-    
+    vis_grasp.width_meter = gg.width
+
     grasp_pub.publish(vis_grasp)
 
 if __name__=='__main__':
