@@ -60,7 +60,7 @@ def draw_grasp(grasp, image, camInfo):
 
 
     cv.putText(image,'Q: ' + str(grasp.quality), (10,75), cv.FONT_HERSHEY_PLAIN, camInfo.height/120,(255,255,255), camInfo.height/200)
-    
+
     im_rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
 
     img_msg = bridge.cv2_to_imgmsg(im_rgb, encoding="passthrough")
@@ -171,7 +171,7 @@ def fill_grasp(grasp):
 
     # Width conversions
     if grasp.width_pixel == 0.0:
-        grasp.width_pixel = width_m_to_pixel(grasp.width_m, depth_m, ci) / 2
+        grasp.width_pixel = width_m_to_pixel(grasp.width_meter, depth_m, ci) / 2
     if grasp.width_meter == 0.0:
         grasp.width_meter = width_pixel_to_m(grasp.width_pixel, depth_m, ci)
     # print(grasp)
@@ -208,7 +208,6 @@ def grasp_callback(msg):
 
         if rospy.get_param('~options/draw_image') and img is not None:
             draw_grasp(msg, img, ci)
-
 
 
 if __name__ == '__main__':
