@@ -58,8 +58,7 @@ def draw_grasp(grasp, image, camInfo):
     # Draw rectangle
     cv.drawContours(image, [np.array(Points[3:]).astype(int)], 0, (255,0,0), camInfo.height/180)
 
-
-    cv.putText(image,'Q: ' + str(grasp.quality), (10,75), cv.FONT_HERSHEY_PLAIN, camInfo.height/120,(255,255,255), camInfo.height/200)
+    cv.putText(image,'Q: ' + str(grasp.quality), (10, 75), cv.FONT_HERSHEY_PLAIN, camInfo.height/120, (255,255,255), camInfo.height/200)
 
     im_rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
 
@@ -142,7 +141,6 @@ def depth_callback(msg):
 def fill_grasp(grasp):
     global ci, depth
 
-
     # Construct 2D pose from 3D
     if grasp.pose2D.x == 0.0 and grasp.pose2D.y == 0.0:
         grasp_center = camera_to_pixel(ci, [grasp.pose.position.x, grasp.pose.position.y, grasp.pose.position.z])
@@ -167,7 +165,6 @@ def fill_grasp(grasp):
         grasp.pose.orientation.y = q[1]
         grasp.pose.orientation.z = q[2]
         grasp.pose.orientation.w = q[3]
-
 
     # Width conversions
     if grasp.width_pixel == 0.0:
