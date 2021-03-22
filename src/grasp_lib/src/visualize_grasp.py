@@ -58,7 +58,7 @@ def draw_grasp(grasp, image, camInfo):
     # Draw rectangle
     cv.drawContours(image, [np.array(Points[3:]).astype(int)], 0, (255,0,0), camInfo.height/180)
 
-    cv.putText(image,'Q: ' + str(grasp.quality), (10, 75), cv.FONT_HERSHEY_PLAIN, camInfo.height/120, (255,255,255), camInfo.height/200)
+    cv.putText(image,'Q: ' + str(round(grasp.quality, 3)), (10, 75), cv.FONT_HERSHEY_PLAIN, camInfo.height/120, (255,255,255), camInfo.height/200)
 
     im_rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
 
