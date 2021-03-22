@@ -76,7 +76,7 @@ def create_grasp_markers(grasp, type="gripper"):
 
     grasp_marker = Marker()
 
-    grasp_marker.header.frame_id = 'grasp'
+    grasp_marker.header.frame_id = 'grasp_' + grasp.name
     # grasp_marker.header.stamp = rospy.Time.now()
     grasp_marker.lifetime = rospy.Duration(0)
     grasp_marker.type = grasp_marker.ARROW
@@ -189,7 +189,7 @@ def grasp_callback(msg):
         t = TransformStamped()
         t.header.frame_id = rospy.get_param('~grasp/grasp_frame')
         t.header.stamp = rospy.Time.now()
-        t.child_frame_id = 'grasp'
+        t.child_frame_id = 'grasp_' + msg.name
         t.transform.translation = msg.pose.position
 
         q = msg.pose.orientation
