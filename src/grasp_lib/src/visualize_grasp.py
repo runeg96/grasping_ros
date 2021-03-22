@@ -45,17 +45,21 @@ def draw_grasp(grasp, image, camInfo):
     Points.append((Points[2][0]+x, Points[2][1]+y))
 
     # Draw points
-    for point in Points[0:3]:
-        point = (int(x) for x in point)
+    try:
+        for point in Points[0:3]:
+            point = (int(x) for x in point)
 
-        point = list(point)
-        #Make sure points stay within image
-        point[0] = point[0] if point[0] < camInfo.width else camInfo.width -1
-        point[1] = point[1] if point[1] < camInfo.height else camInfo.height -1
-        point[0] = point[0] if point[0] > 0 else 1
-        point[1] = point[1] if point[1] > 0 else 1
+            point = list(point)
+            #Make sure points stay within image
+            point[0] = point[0] if point[0] < camInfo.width else camInfo.width -1
+            point[1] = point[1] if point[1] < camInfo.height else camInfo.height -1
+            point[0] = point[0] if point[0] > 0 else 1
+            point[1] = point[1] if point[1] > 0 else 1
 
-        cv.circle(image, tuple(point), camInfo.height/180*3, (0, 0, 255), -1)
+            cv.circle(image, tuple(point), camInfo.height/180*3, (0, 0, 255), -1)
+    except Exception as e:
+        pass
+
 
     # Draw rectangle
     cv.drawContours(image, [np.array(Points[3:]).astype(int)], 0, (255,0,0), camInfo.height/180)
