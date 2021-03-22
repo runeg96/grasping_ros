@@ -15,7 +15,7 @@ def gg_callback(msg):
     ggcnn: msg.data = [x, y, z, ang, width, depth_center]
     '''
     new_grasp = Grasp()
-
+    new_grasp.name = "ggcnn"
     new_grasp.pose2D.x = msg.data[7]
     new_grasp.pose2D.y = msg.data[6]
     new_grasp.pose2D.theta = msg.data[3]
