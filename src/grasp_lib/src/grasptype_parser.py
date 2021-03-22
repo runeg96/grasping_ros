@@ -19,22 +19,9 @@ def gg_callback(msg):
     new_grasp.pose2D.x = msg.data[7]
     new_grasp.pose2D.y = msg.data[6]
     new_grasp.pose2D.theta = msg.data[3]
-    # new_grasp.pose.position.x = msg.data[0]
-    # new_grasp.pose.position.y = msg.data[1]
-    # new_grasp.pose.position.z = msg.data[2]
-    #
-    #
-    # q = quaternion_from_euler(0.0, 0.0, msg.data[3])
-    # new_grasp.pose.orientation.x = q[0]
-    # new_grasp.pose.orientation.y = q[1]
-    # new_grasp.pose.orientation.z = q[2]
-    # new_grasp.pose.orientation.w = q[3]
-    #
-
-
     new_grasp.width_meter = msg.data[4]/1000
 
-    new_grasp.quality = msg.data[8] # Unknown
+    new_grasp.quality = msg.data[8]
     grasp_pub.publish(new_grasp)
 
 def vgn_callback(msg):
