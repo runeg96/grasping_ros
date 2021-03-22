@@ -2,5 +2,5 @@
 
 <launch>
   <node name="task_frame_broadcaster" pkg="grasp_lib" type="task_broadcaster.py" output="screen"/>
-  <node name="panda_detection_node" pkg="vgn" type="panda_detection.py" args="--model $(find vgn)/data/models/vgn_conv.pth" output="screen"/>
+  <node name="panda_detection_node" pkg="vgn" type="panda_detection.py" args="--model $(find grasp_lib)/resources/data/models/vgn_conv.pth" output="screen"/>
 </launch>
