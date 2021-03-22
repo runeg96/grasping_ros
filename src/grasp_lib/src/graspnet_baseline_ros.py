@@ -136,6 +136,7 @@ def demo():
 
 def grasp_paser(gg):
     vis_grasp = Grasp()
+    vis_grasp.name = "baseline"
     vis_grasp.pose.position.x = gg.translation[0]
     vis_grasp.pose.position.y = gg.translation[1]
     vis_grasp.pose.position.z = gg.translation[2]
