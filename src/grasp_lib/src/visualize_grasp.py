@@ -83,11 +83,12 @@ def create_grasp_markers(grasp, type="gripper"):
     grasp_marker.action = grasp_marker.ADD
     grasp_marker.ns = 'grasp_marker_' + grasp.name
 
-    grasp_marker.scale.x, grasp_marker.scale.y, grasp_marker.scale.z = 0.02, 0.03, 0.05
+    grasp_marker.scale.x = 0.02
     grasp_marker.color.a = 1.0
     grasp_marker.pose.orientation.w = 1.0
 
     if type == "arrow":
+        grasp_marker.scale.y, grasp_marker.scale.z = 0.03, 0.05
         grasp_marker.color.r, grasp_marker.color.g, grasp_marker.color.b = (1.0, 0.0, 0.0)
 
         grasp_marker.id = 1
