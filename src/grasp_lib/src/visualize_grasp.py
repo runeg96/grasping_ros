@@ -7,6 +7,8 @@ import cv2 as cv
 from cv_bridge import CvBridge
 import tf.msg
 
+from colorhash import ColorHash
+
 # from ggcnn.msg import Grasp
 from grasp_lib.msg import Grasp
 
@@ -67,9 +69,9 @@ def draw_grasp(grasp, image, camInfo):
 
 
 
-def create_grasp_markers(new_grasp, type="gripper"):
+def create_grasp_markers(grasp, type="gripper"):
 
-    width_m = new_grasp.width_meter
+    width_m = grasp.width_meter
     depth = 0.06
 
     grasp_marker = Marker()
@@ -79,7 +81,7 @@ def create_grasp_markers(new_grasp, type="gripper"):
     grasp_marker.lifetime = rospy.Duration(0)
     grasp_marker.type = grasp_marker.ARROW
     grasp_marker.action = grasp_marker.ADD
-    grasp_marker.ns = 'grasp_markers'
+    grasp_marker.ns = 'grasp_marker_' + grasp.name
 
     grasp_marker.scale.x, grasp_marker.scale.y, grasp_marker.scale.z = 0.02, 0.03, 0.05
     grasp_marker.color.a = 1.0
@@ -115,7 +117,8 @@ def create_grasp_markers(new_grasp, type="gripper"):
         marker_pub.publish(grasp_marker)
 
     elif type == "gripper":
-        grasp_marker.color.r, grasp_marker.color.g, grasp_marker.color.b = (0.0, 1.0, 0.0)
+        c = ColorHash(grasp.name)
+        grasp_marker.color.r, grasp_marker.color.g, grasp_marker.color.b = c.rgb
         grasp_marker.type = grasp_marker.LINE_LIST
         grasp_marker.id = 4
         grasp_marker.points.append(Point(0.10+depth, 0.0, 0.0))
