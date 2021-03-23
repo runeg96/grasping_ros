@@ -183,9 +183,23 @@ def fill_grasp(grasp):
     return grasp
 
 
+def publish_names():
+    methods = ["gr", "ggcnn", "vgn", "baseline"]
+    wid = 200;
+    names = np.zeros((100, wid*len(methods), 3), np.uint8)
+
+    for i in range(len(methods)):
+        names[:,wid*i:wid*(i+1)] = ColorHash(methods[i]).rgb
+        cv.putText(names, methods[i], (10+wid*i, 65), cv.FONT_HERSHEY_PLAIN, 2.5, (255,255,255), 2)
+
+    name_msg = bridge.cv2_to_imgmsg(names, encoding="passthrough")
+    names_pub.publish(name_msg)
+
 
 def grasp_callback(msg):
     global img, depth, ci
+
+    publish_names()
 
     if depth is not None:
         msg = fill_grasp(msg)
@@ -220,6 +234,7 @@ if __name__ == '__main__':
     rospy.init_node('visualize_grasp')
 
     image_pub = rospy.Publisher(rospy.get_param('~output/image_points'), Image, queue_size=1)
+    names_pub = rospy.Publisher(rospy.get_param('~output/method_names'), Image, queue_size=1)
     marker_pub = rospy.Publisher(rospy.get_param('~output/marker_topic'), Marker, queue_size=10)
     tf_pub = rospy.Publisher('/tf', tf.msg.tfMessage, queue_size=1)
 
