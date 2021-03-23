@@ -50,7 +50,7 @@ def parse_args():
 
 def parse_grasp_to_rviz(grasp_center, width_pixel, quality, angle):
         vis_grasp = Grasp()
-        vis_grasp.name = "GR"
+        vis_grasp.name = "gr"
         vis_grasp.pose2D.x = grasp_center[1] + 208
         vis_grasp.pose2D.y = grasp_center[0] + 128
         vis_grasp.pose2D.theta = - angle
