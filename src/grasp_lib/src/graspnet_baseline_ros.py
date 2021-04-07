@@ -142,21 +142,22 @@ def grasps_parser(gg):
     temp_grasp.name = "baseline"
 
     for grasp in gg:
-        temp_grasp.pose.position.x = grasp.translation[0]
-        temp_grasp.pose.position.y = grasp.translation[1]
-        temp_grasp.pose.position.z = grasp.translation[2]
+        if grasp.score > 0.3:
+            temp_grasp.pose.position.x = grasp.translation[0]
+            temp_grasp.pose.position.y = grasp.translation[1]
+            temp_grasp.pose.position.z = grasp.translation[2]
 
-        r = R.from_matrix(grasp.rotation_matrix)
-        q = r.as_quat()
+            r = R.from_matrix(grasp.rotation_matrix)
+            q = r.as_quat()
 
-        temp_grasp.pose.orientation.x = q[0]
-        temp_grasp.pose.orientation.y = q[1]
-        temp_grasp.pose.orientation.z = q[2]
-        temp_grasp.pose.orientation.w = q[3]
-        temp_grasp.quality = grasp.score
-        temp_grasp.width_meter = grasp.width
+            temp_grasp.pose.orientation.x = q[0]
+            temp_grasp.pose.orientation.y = q[1]
+            temp_grasp.pose.orientation.z = q[2]
+            temp_grasp.pose.orientation.w = q[3]
+            temp_grasp.quality = grasp.score
+            temp_grasp.width_meter = grasp.width
 
-        vis_grasps.append(temp_grasp)
+            vis_grasps.grasps.append(temp_grasp)
 
     grasps_pub.publish(vis_grasps)
 
