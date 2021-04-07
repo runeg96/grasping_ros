@@ -81,7 +81,7 @@ def create_grasp_markers(grasp, g_num, type="gripper"):
 
     grasp_marker.header.frame_id = 'grasp_' + grasp.name + str(g_num)
     # grasp_marker.header.stamp = rospy.Time.now()
-    grasp_marker.lifetime = rospy.Duration(0)
+    grasp_marker.lifetime = rospy.Duration(5)
     grasp_marker.type = grasp_marker.ARROW
     grasp_marker.action = grasp_marker.ADD
     grasp_marker.ns = 'grasp_marker_' + grasp.name + str(g_num)
