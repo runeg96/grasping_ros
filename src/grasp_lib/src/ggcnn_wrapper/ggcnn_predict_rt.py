@@ -126,6 +126,7 @@ def depth_callback(depth_message):
 
 
 depth_sub = rospy.Subscriber('/ptu_camera/camera/aligned_depth_to_color/image_raw', Image, depth_callback, queue_size=1)
+print("GGCNN IS RUNNING")
 
 while not rospy.is_shutdown():
     rospy.spin()
