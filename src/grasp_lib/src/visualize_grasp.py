@@ -191,6 +191,7 @@ def publish_names():
         names[:,wid*i:wid*(i+1)] = ColorHash(methods[i]).rgb
         cv.putText(names, methods[i], (10+wid*i, 65), cv.FONT_HERSHEY_PLAIN, 2.5, (255,255,255), 2)
 
+    names = cv.cvtColor(names, cv.COLOR_BGR2RGB)
     name_msg = bridge.cv2_to_imgmsg(names, encoding="passthrough")
     names_pub.publish(name_msg)
 
