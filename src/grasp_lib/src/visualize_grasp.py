@@ -249,6 +249,7 @@ if __name__ == '__main__':
     ci = rospy.wait_for_message(rospy.get_param('~camera/info_topic'), CameraInfo, timeout=None)
 
     img, depth = None, None
+    g_num = 0
 
     # if draw_image = True
     if rospy.get_param('~options/draw_image'):
