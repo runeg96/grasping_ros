@@ -34,3 +34,6 @@
 [submodule "src/vgn"]
 	path = src/vgn
 	url = https://github.com/runeg96/vgn.git
+[submodule "src/ggcnn"]
+	path = src/ggcnn
+	url = https://github.com/dougsm/ggcnn.git
