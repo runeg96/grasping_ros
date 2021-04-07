@@ -9,8 +9,7 @@ import tf.msg
 
 from colorhash import ColorHash
 
-# from ggcnn.msg import Grasp
-from grasp_lib.msg import Grasp
+from grasp_lib.msg import Grasp, Grasps
 
 from scipy.spatial.transform import Rotation
 
@@ -73,7 +72,7 @@ def draw_grasp(grasp, image, camInfo):
 
 
 
-def create_grasp_markers(grasp, type="gripper"):
+def create_grasp_markers(grasp, g_num, type="gripper"):
 
     width_m = grasp.width_meter
     depth = 0.06
@@ -85,7 +84,7 @@ def create_grasp_markers(grasp, type="gripper"):
     grasp_marker.lifetime = rospy.Duration(0)
     grasp_marker.type = grasp_marker.ARROW
     grasp_marker.action = grasp_marker.ADD
-    grasp_marker.ns = 'grasp_marker_' + grasp.name
+    grasp_marker.ns = 'grasp_marker_' + grasp.name + str(g_num)
 
     grasp_marker.scale.x = 0.02
     grasp_marker.color.a = 1.0
@@ -196,8 +195,16 @@ def publish_names():
     names_pub.publish(name_msg)
 
 
+def grasps_callback(msg):
+    global g_num
+
+    for index, grasp in enumerate(msg.grasps):
+        g_num = index
+        grasp_callback(grasp)
+
+
 def grasp_callback(msg):
-    global img, depth, ci
+    global img, depth, ci, g_num
 
     publish_names()
 
@@ -208,7 +215,7 @@ def grasp_callback(msg):
         t = TransformStamped()
         t.header.frame_id = rospy.get_param('~grasp/grasp_frame')
         t.header.stamp = rospy.Time.now()
-        t.child_frame_id = 'grasp_' + msg.name
+        t.child_frame_id = 'grasp_' + msg.name + str(g_num)
         t.transform.translation = msg.pose.position
 
         q = msg.pose.orientation
@@ -223,7 +230,7 @@ def grasp_callback(msg):
         tfm = tf.msg.tfMessage([t])
         tf_pub.publish(tfm)
 
-        create_grasp_markers(msg)
+        create_grasp_markers(msg, g_num)
 
         if rospy.get_param('~options/draw_image') and img is not None:
             draw_grasp(msg, img, ci)
@@ -251,5 +258,6 @@ if __name__ == '__main__':
         rospy.Subscriber(rospy.get_param('~~camera/depth_topic'), Image, depth_callback)
 
     rospy.Subscriber(rospy.get_param('~input/grasp_topic'), Grasp, grasp_callback)
+    rospy.Subscriber(rospy.get_param('~input/grasps_topic'), Grasps, grasps_callback)
 
     rospy.spin()
