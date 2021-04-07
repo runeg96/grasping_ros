@@ -14,7 +14,7 @@ from PIL import Image
 
 import torch
 from graspnetAPI import GraspGroup
-from grasp_lib.msg import Grasp
+from grasp_lib.msg import Grasp, Grasps
 
 from scipy.spatial.transform import Rotation as R
 
@@ -132,7 +132,35 @@ def demo():
     gg.sort_by_score()
     print(gg[0])
     grasp_paser(gg[0])
+    grasps_parser(gg)
     # vis_grasps(gg, cloud)
+
+def grasps_parser(gg):
+    temp_grasp = Grasp()
+    vis_grasps = Grasps()
+
+    temp_grasp.name = "baseline"
+
+    for grasp in gg:
+        temp_grasp.pose.position.x = grasp.translation[0]
+        temp_grasp.pose.position.y = grasp.translation[1]
+        temp_grasp.pose.position.z = grasp.translation[2]
+
+        r = R.from_matrix(grasp.rotation_matrix)
+        q = r.as_quat()
+
+        temp_grasp.pose.orientation.x = q[0]
+        temp_grasp.pose.orientation.y = q[1]
+        temp_grasp.pose.orientation.z = q[2]
+        temp_grasp.pose.orientation.w = q[3]
+        temp_grasp.quality = grasp.score
+        temp_grasp.width_meter = grasp.width
+
+        vis_grasps.append(temp_grasp)
+
+    grasps_pub.publish(vis_grasps)
+
+
 
 def grasp_paser(gg):
     vis_grasp = Grasp()
@@ -156,6 +184,7 @@ def grasp_paser(gg):
 if __name__=='__main__':
     rospy.init_node('graspnet_baseline_ros')
     grasp_pub = rospy.Publisher(rospy.get_param("visualize_grasp/input/grasp_topic"), Grasp, queue_size=1)
+    grasps_pub = rospy.Publisher(rospy.get_param("visualize_grasp/input/grasps_topic"), Grasps, queue_size=1)
     net = get_net()
     while not rospy.is_shutdown():
         demo()
