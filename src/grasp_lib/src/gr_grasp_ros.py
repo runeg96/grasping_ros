@@ -17,7 +17,7 @@ import numpy as np
 import torch.utils.data
 
 from grasp_utils.utils import pixel_to_camera, width_pixel_to_m
-from grasp_lib.msg import Grasp
+from grasp_lib.msg import Grasp, Grasps
 
 from sensor_msgs.msg import Image, CameraInfo
 from scipy.spatial.transform import Rotation
@@ -39,7 +39,7 @@ def parse_args():
                         help='Use Depth image for evaluation (1/0)')
     parser.add_argument('--use-rgb', type=int, default=1,
                         help='Use RGB image for evaluation (1/0)')
-    parser.add_argument('--n-grasps', type=int, default=1,
+    parser.add_argument('--n-grasps', type=int, default=10,
                         help='Number of grasps to consider per image')
     parser.add_argument('--cpu', dest='force_cpu', action='store_true', default=False,
                         help='Force code to run in CPU mode')
@@ -58,11 +58,32 @@ def parse_grasp_to_rviz(grasp_center, width_pixel, quality, angle):
         vis_grasp.quality = quality
         grasp_pub.publish(vis_grasp)
 
+def parse_grasps_to_rviz(grasps):
+    temp_grasp = Grasp()
+    vis_grasps = Grasps()
+
+    temp_grasp.name = "gr"
+
+    for grasp in grasps:
+        if grasp.quality > 0.3:
+            temp_grasp.pose2D.x = grasp.center[1] + 208
+            temp_grasp.pose2D.y = grasp.center[0] + 128
+            temp_grasp.pose2D.theta = -grasp.angle
+
+            temp_grasp.quality = grasp.quality
+            temp_grasp.width_pixel = grasp.width
+
+            vis_grasps.grasps.append(temp_grasp)
+
+    grasps_pub.publish(vis_grasps)
+
+
 if __name__ == '__main__':
     args = parse_args()
 
     rospy.init_node("gr_grasp_ros")
     grasp_pub = rospy.Publisher(rospy.get_param("visualize_grasp/input/grasp_topic"), Grasp, queue_size=1)
+    grasps_pub = rospy.Publisher(rospy.get_param("visualize_grasp/input/grasps_topic"), Grasps, queue_size=1)
     cam_data = CameraData(include_depth=args.use_depth, include_rgb=args.use_rgb)
     # Load Network
     logging.info('Loading model...')
@@ -89,5 +110,6 @@ if __name__ == '__main__':
 
             q_img, ang_img, width_img = post_process_output(pred['pos'], pred['cos'], pred['sin'], pred['width'])
 
-            grasps = detect_grasps(q_img, ang_img, width_img)
+            grasps = detect_grasps(q_img, ang_img, width_img,args.n_grasps)
             parse_grasp_to_rviz(grasps[0].center,grasps[0].width, grasps[0].quality, grasps[0].angle)
+            parse_grasps_to_rviz(grasps)
