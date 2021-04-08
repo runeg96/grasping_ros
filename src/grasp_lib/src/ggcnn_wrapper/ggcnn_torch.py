@@ -11,7 +11,7 @@ import torch
 ROOT_DIR = path.dirname(path.abspath(__file__))
 sys.path.append(path.join(ROOT_DIR, '../../../ggcnn'))
 
-MODEL_FILE = '../../resources/ggcnn_models/epoch_50_cornell'
+MODEL_FILE = '../../resources/ggcnn_models/epoch_37_iou_0.78'
 
 model = torch.load(path.join(path.dirname(__file__), MODEL_FILE))
 device = torch.device("cuda:0")

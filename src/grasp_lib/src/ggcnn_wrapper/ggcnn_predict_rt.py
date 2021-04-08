@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 import rospy
 
 import numpy as np
@@ -7,12 +7,12 @@ import cv2
 from skimage.draw import circle
 from skimage.feature import peak_local_max
 
-from cv_bridge import CvBridge
+# from cv_bridge import CvBridge
 from sensor_msgs.msg import Image, CameraInfo
 from std_msgs.msg import Float32MultiArray
 from ggcnn_torch import predict
 
-bridge = CvBridge()
+# bridge = CvBridge()
 
 rospy.init_node('ggcnn_detection')
 
@@ -36,14 +36,32 @@ cx = K[2]
 fy = K[4]
 cy = K[5]
 
+def numpy_to_imgmsg(image, stamp=None):
 
-def depth_callback(depth_message):
+    rosimage = Image()
+    rosimage.height = image.shape[0]
+    rosimage.width = image.shape[1]
+    if image.dtype == np.uint8:
+        rosimage.encoding = '8UC3'
+        rosimage.data = image.ravel().tolist()
+        rosimage.step = len(rosimage.data) // rosimage.height
+    else:
+        rosimage.encoding = '32FC1'
+        rosimage.data = np.array(image.flat, dtype=np.float32).tostring()
+        rosimage.step = len(rosimage.data) // rosimage.height
+    if stamp is not None:
+        rosimage.header.stamp = stamp
+    return rosimage
+
+def depth_callback(depth_msg):
 
     global prev_mp
     global fx, cx, fy, cy
 
-    depth = bridge.imgmsg_to_cv2(depth_message, desired_encoding="32FC1")
-    depth = depth/1000
+    # depth = bridge.imgmsg_to_cv2(depth_message, desired_encoding="32FC1")
+    depth = np.frombuffer(depth_msg.data, dtype=np.uint16).reshape(depth_msg.height, depth_msg.width)
+    depth = depth.astype(np.float32)/1000
+    # depth = depth/1000
     #  Crop a square out of the middle of the depth and resize it to 300*300
     crop_size = 300
     crop_offset = 40
@@ -107,17 +125,20 @@ def depth_callback(depth_message):
 
 
     # Publish the output images (not used for control, only visualisation)
-    grasp_img = bridge.cv2_to_imgmsg(grasp_img, 'bgr8')
-    grasp_img.header = depth_message.header
+    # grasp_img = bridge.cv2_to_imgmsg(grasp_img, 'bgr8')
+    grasp_img = numpy_to_imgmsg(grasp_img)
+    grasp_img.header = depth_msg.header
     grasp_pub.publish(grasp_img)
 
-    grasp_img_plain = bridge.cv2_to_imgmsg(grasp_img_plain, 'bgr8')
-    grasp_img_plain.header = depth_message.header
+    grasp_img_plain = numpy_to_imgmsg(grasp_img_plain)
+    # grasp_img_plain = bridge.cv2_to_imgmsg(grasp_img_plain, 'bgr8')
+    grasp_img_plain.header = depth_msg.header
     grasp_plain_pub.publish(grasp_img_plain)
 
-    depth_pub.publish(bridge.cv2_to_imgmsg(depth_crop, encoding="32FC1"))
 
-    ang_pub.publish(bridge.cv2_to_imgmsg(ang_out))
+    depth_pub.publish(numpy_to_imgmsg(depth_crop))
+
+    ang_pub.publish(numpy_to_imgmsg(ang_out))
 
     # Output the best grasp pose relative to camera.
     cmd_msg = Float32MultiArray()
