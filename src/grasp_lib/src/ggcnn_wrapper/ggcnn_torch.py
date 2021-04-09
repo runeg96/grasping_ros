@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+
 from os import path
 import sys
 
@@ -13,8 +14,14 @@ sys.path.append(path.join(ROOT_DIR, '../../../ggcnn'))
 
 MODEL_FILE = '../../resources/ggcnn_models/epoch_37_iou_0.78'
 
-model = torch.load(path.join(path.dirname(__file__), MODEL_FILE))
-device = torch.device("cuda:0")
+if torch.cuda.is_available():
+    device = torch.device('cuda:0')
+else:
+    print("Using CPU")
+    device = torch.device('cpu')
+
+model = torch.load(path.join(path.dirname(__file__), MODEL_FILE), map_location=device)
+
 
 
 def process_depth_image(depth, crop_size, out_size=300, return_mask=False, crop_y_offset=0):
