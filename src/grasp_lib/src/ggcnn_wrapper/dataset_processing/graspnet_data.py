@@ -26,7 +26,7 @@ class GraspnetDataset(GraspDatasetBase):
         """
         super(GraspnetDataset, self).__init__(**kwargs)
 
-        graspf = glob.glob(os.path.join(file_path, '*', 'realsense', '0*.txt'))
+        graspf = glob.glob(os.path.join(file_path, '*', 'realsense/rect', '*.txt'))
         graspf.sort()
         l = len(graspf)
 
@@ -36,7 +36,7 @@ class GraspnetDataset(GraspDatasetBase):
         if ds_rotate:
             graspf = graspf[int(l*ds_rotate):] + graspf[:int(l*ds_rotate)]
 
-        depthf = [f.replace('realsense', 'realsense/depth') for f in graspf]
+        depthf = [f.replace('rect', 'depth') for f in graspf]
         depthf = [f.replace('.txt', '.png') for f in depthf]
 
         rgbf = [f.replace('depth', 'rgb') for f in depthf]
