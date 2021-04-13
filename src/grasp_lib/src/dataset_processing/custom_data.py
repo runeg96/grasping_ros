@@ -22,8 +22,8 @@ class CustomDataset(GraspDatasetBase):
         :param kwargs: kwargs for GraspDatasetBase
         """
         super(CustomDataset, self).__init__(**kwargs)
-
         graspf = glob.glob(os.path.join(file_path, '*_newer_annotations.txt'))
+        self.length = len(graspf)
         graspf.sort()
         l = len(graspf)
         if l == 0:
