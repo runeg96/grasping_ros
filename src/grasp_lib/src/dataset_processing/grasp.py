@@ -113,7 +113,7 @@ class GraspRectangles:
     def load_from_graspnet_file(cls, fname, scale=1.0):
         grs = []
         f = np.load(fname)
-        f = f[0:99]
+        f = f[0:1000]
         for l in f:
             x = l[0]
             y = l[1]
