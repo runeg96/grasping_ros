@@ -5,7 +5,7 @@ import cv2 as cv
 def convert(grasp):
 
     center = (grasp[0], grasp[1])
-    angle = grasp[2]/180.0*np.pi
+    angle = (grasp[2]+90)/180.0*np.pi
     print(angle)
     length = grasp[3]
     width = grasp[4]
@@ -27,17 +27,18 @@ def convert(grasp):
         ]
     )
 
-path = '/home/jan/Downloads/Jacquard_Samples/Samples/61921ef74746301497380cf93ab53c21/0_61921ef74746301497380cf93ab53c21'
+path = '/home/slave/Documents/Datasets/Jacquard/100f39dce7690f59efb94709f30ce0d2/1_100f39dce7690f59efb94709f30ce0d2'
 
 image = cv.imread(path + '_RGB.png')
 
 with open(path + '_grasps.txt', 'a+') as file:
     file.seek(0)
-    
+
     for line in file:
         y = line.split(';')
         y[-1] = y[-1].rstrip('\r\n')
         color = list(np.random.choice(range(256), size=3))
-        cv.drawContours(image, [np.array(convert([float(i) for i in y])).astype(int)], 0, color, 1)
+        print(color)
+        cv.drawContours(image, [np.array(convert([float(i) for i in y])).astype(int)], 0, (int(color[0]),int(color[1]),int(color[2])), 1)
 
 cv.imwrite('output.png', image)
