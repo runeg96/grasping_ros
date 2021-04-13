@@ -59,6 +59,7 @@ if __name__ == '__main__':
     if args.dataset in ["cornell", "jacquard"]:
         Dataset = get_dataset(args.dataset)
     elif args.dataset == "custom":
+        sys.path.append("..")
         from dataset_processing.custom_data import CustomDataset
         Dataset = CustomDataset
 
@@ -119,7 +120,7 @@ if __name__ == '__main__':
             if args.vis:
                 evaluation.plot_output(test_data.dataset.get_rgb(didx, rot, zoom, normalise=False),
                                        test_data.dataset.get_depth(didx, rot, zoom), q_img,
-                                       ang_img, no_grasps=args.n_grasps, grasp_width_img=width_img)
+                                       ang_img, no_grasps=args.n_grasps, grasp_width_img=width_img, ground_truth_bbs=test_data.dataset.get_gtbb(didx, rot, zoom))
 
     if args.iou_eval:
         logging.info('IOU Results: %d/%d = %f' % (results['correct'],
