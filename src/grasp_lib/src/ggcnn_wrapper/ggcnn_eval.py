@@ -10,7 +10,8 @@ ROOT_DIR = path.dirname(path.abspath(__file__))
 sys.path.append(path.join(ROOT_DIR, '../../../ggcnn'))
 
 from models.common import post_process_output
-from utils.dataset_processing import evaluation, grasp
+sys.path.append("..")
+from dataset_processing import grasp, evaluation
 from utils.data import get_dataset
 logging.basicConfig(level=logging.INFO)
 
@@ -62,12 +63,17 @@ if __name__ == '__main__':
         sys.path.append("..")
         from dataset_processing.custom_data import CustomDataset
         Dataset = CustomDataset
+    elif args.dataset == "graspnet":
+        sys.path.append("..")
+        from dataset_processing.graspnet_data import GraspnetDataset
+        Dataset = GraspnetDataset
 
 
     path = {
         "cornell": "/home/slave/Documents/Datasets/Cornell",
         "custom": "/home/slave/Documents/Datasets/LH7",
-        "jacquard": "/home/slave/Documents/Datasets/Jacquard"
+        "jacquard": "/home/slave/Documents/Datasets/Jacquard",
+        "graspnet": "/home/slave/Documents/Datasets/Graspnet"
     }
 
     test_dataset = Dataset(path[args.dataset], start=args.split, end=1.0, ds_rotate=args.ds_rotate,
