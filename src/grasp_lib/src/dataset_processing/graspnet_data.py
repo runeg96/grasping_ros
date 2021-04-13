@@ -2,15 +2,14 @@ import os
 import glob
 import sys
 
-import numpy as np
-import math
+
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(ROOT_DIR, '../../../../ggcnn'))
 
-from .grasp_data import GraspDatasetBase
-from utils.dataset_processing import grasp, image
-
+from utils.data.grasp_data import GraspDatasetBase
+from utils.dataset_processing import image
+from dataset_processing import grasp
 
 class GraspnetDataset(GraspDatasetBase):
     """
@@ -26,7 +25,7 @@ class GraspnetDataset(GraspDatasetBase):
         """
         super(GraspnetDataset, self).__init__(**kwargs)
 
-        graspf = glob.glob(os.path.join(file_path, '*', 'realsense/rect', '*.txt'))
+        graspf = glob.glob(os.path.join(file_path, '*', 'realsense/rect', '*.npy'))
         graspf.sort()
         l = len(graspf)
 
@@ -37,7 +36,7 @@ class GraspnetDataset(GraspDatasetBase):
             graspf = graspf[int(l*ds_rotate):] + graspf[:int(l*ds_rotate)]
 
         depthf = [f.replace('rect', 'depth') for f in graspf]
-        depthf = [f.replace('.txt', '.png') for f in depthf]
+        depthf = [f.replace('.npy', '.png') for f in depthf]
 
         rgbf = [f.replace('depth', 'rgb') for f in depthf]
 
@@ -45,28 +44,8 @@ class GraspnetDataset(GraspDatasetBase):
         self.depth_files = depthf[int(l*start):int(l*end)]
         self.rgb_files = rgbf[int(l*start):int(l*end)]
 
-    def load_from_graspnet_file(self, fname, scale=1.0):
-        grs = []
-        f = np.load(fname)
-        for l in f:
-            x = l[0]
-            y = l[1]
-            ox = l[2]
-            oy = l[3]
-
-            angle = math.atan2(oy-y, ox-x)
-
-            w = math.hypot(ox - x, oy - y)
-            h = l[4]
-
-            grs.append(Grasp(np.array([x, y]), angle, w, h).as_gr)
-            # cx, cy, ox, oy, h, q, oid 
-            # grs = cls(grs)
-        grs.scale(scale)
-        return grs  
-
     def get_gtbb(self, idx, rot=0, zoom=1.0):
-        gtbbs = grasp.GraspRectangles.load_from_jacquard_file(self.grasp_files[idx], scale=self.output_size / 1024.0)
+        gtbbs = grasp.GraspRectangles.load_from_graspnet_file(self.grasp_files[idx], scale=self.output_size / 1024.0)
         c = self.output_size//2
         gtbbs.rotate(rot, (c, c))
         gtbbs.zoom(zoom, (c, c))
