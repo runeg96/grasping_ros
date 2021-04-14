@@ -9,7 +9,7 @@ from utils.data.grasp_data import GraspDatasetBase
 from dataset_processing import grasp, image
 
 
-class CustomDataset(GraspDatasetBase):
+class CornellDataset(GraspDatasetBase):
     """
     Dataset wrapper for the Cornell dataset.
     """
@@ -21,9 +21,9 @@ class CustomDataset(GraspDatasetBase):
         :param ds_rotate: If splitting the dataset, rotate the list of items by this fraction first
         :param kwargs: kwargs for GraspDatasetBase
         """
-        super(CustomDataset, self).__init__(**kwargs)
-        graspf = glob.glob(os.path.join(file_path, '*_newer_annotations.txt'))
-        self.length = len(graspf)
+        super(CornellDataset, self).__init__(**kwargs)
+
+        graspf = glob.glob(os.path.join(file_path, '*', 'pcd*cpos.txt'))
         graspf.sort()
         l = len(graspf)
         if l == 0:
@@ -32,9 +32,8 @@ class CustomDataset(GraspDatasetBase):
         if ds_rotate:
             graspf = graspf[int(l*ds_rotate):] + graspf[:int(l*ds_rotate)]
 
-        depthf = [f.replace('_newer_annotations.txt', '.tiff') for f in graspf]
-        depthf = [f.replace('color', 'depth') for f in depthf]
-        rgbf = [f.replace('_newer_annotations.txt', '.png') for f in graspf]
+        depthf = [f.replace('cpos.txt', 'd.tiff') for f in graspf]
+        rgbf = [f.replace('d.tiff', 'r.png') for f in depthf]
 
         self.grasp_files = graspf[int(l*start):int(l*end)]
         self.depth_files = depthf[int(l*start):int(l*end)]
