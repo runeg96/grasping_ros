@@ -15,6 +15,22 @@ from dataset_processing import grasp, evaluation
 from utils.data import get_dataset
 logging.basicConfig(level=logging.INFO)
 
+def get_dataset(dataset_name):
+        if dataset_name == "cornell":
+            from dataset_processing.cornell_data import CornellDataset
+            Dataset = CornellDataset
+        elif dataset_name == "jacquard":
+            from dataset_processing.jacquard_data import JacquardDataset
+            Dataset = JacquardDataset
+        elif dataset_name == "custom":
+            from dataset_processing.custom_data import CustomDataset
+            Dataset = CustomDataset
+        elif dataset_name == "graspnet":
+            from dataset_processing.graspnet_data import GraspnetDataset
+            Dataset = GraspnetDataset
+        else:
+            raise NotImplementedError('Dataset Type {} is Not implemented'.format(args.dataset))
+        return Dataset
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Evaluate GG-CNN')
@@ -55,30 +71,22 @@ if __name__ == '__main__':
     net = torch.load(args.network)
     device = torch.device("cuda:0")
 
+    sys.path.append("..")
     # Load Dataset
     logging.info('Loading {} Dataset...'.format(args.dataset.title()))
-    if args.dataset in ["cornell", "jacquard"]:
-        Dataset = get_dataset(args.dataset)
-    elif args.dataset == "custom":
-        sys.path.append("..")
-        from dataset_processing.custom_data import CustomDataset
-        Dataset = CustomDataset
-    elif args.dataset == "graspnet":
-        sys.path.append("..")
-        from dataset_processing.graspnet_data import GraspnetDataset
-        Dataset = GraspnetDataset
+    Dataset = get_dataset(args.dataset)
 
-
-    path = {
+    dataset_path = {
         "cornell": "/home/slave/Documents/Datasets/Cornell",
         "custom": "/home/slave/Documents/Datasets/LH7",
         "jacquard": "/home/slave/Documents/Datasets/Jacquard",
         "graspnet": "/home/slave/Documents/Datasets/Graspnet"
     }
 
-    test_dataset = Dataset(path[args.dataset], start=args.split, end=1.0, ds_rotate=args.ds_rotate,
+    test_dataset = Dataset(dataset_path[args.dataset], start=args.split, end=1.0, ds_rotate=args.ds_rotate,
                            random_rotate=args.augment, random_zoom=args.augment,
                            include_depth=args.use_depth, include_rgb=args.use_rgb)
+
     test_data = torch.utils.data.DataLoader(
         test_dataset,
         batch_size=1,
