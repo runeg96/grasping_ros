@@ -6,7 +6,7 @@ import logging
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(ROOT_DIR, '../../../ggcnn'))
-
+sys.path.append("..")
 import cv2
 
 import torch
@@ -214,7 +214,6 @@ def run():
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)
     tb = tensorboardX.SummaryWriter(os.path.join(args.logdir, net_desc))
-    sys.path.append("..")
     # Load Dataset
     logging.info('Loading {} Dataset...'.format(args.dataset.title()))
     Dataset = get_dataset(args.dataset)
