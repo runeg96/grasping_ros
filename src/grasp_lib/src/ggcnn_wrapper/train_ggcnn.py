@@ -19,8 +19,8 @@ import tensorboardX
 
 from utils.visualisation.gridshow import gridshow
 
-from utils.dataset_processing import evaluation
-from utils.data import get_dataset
+from dataset_processing import evaluation
+# from utils.data import get_dataset
 from models import get_network
 from models.common import post_process_output
 
@@ -150,7 +150,7 @@ def train(epoch, net, device, train_data, optimizer, batches_per_epoch, vis=Fals
 
             loss = lossd['loss']
 
-            if batch_idx % 100 == 0:
+            if batch_idx % 5 == 0:
                 logging.info('Epoch: {}, Batch: {}, Loss: {:0.4f}'.format(epoch, batch_idx, loss.item()))
 
             results['loss'] += loss.item()
@@ -253,6 +253,7 @@ def run():
 
     net = ggcnn(input_channels=input_channels)
     device = torch.device("cuda:0")
+    logging.info('Using device: {}'.format(device))
     net = net.to(device)
     optimizer = optim.Adam(net.parameters())
     logging.info('Done')
