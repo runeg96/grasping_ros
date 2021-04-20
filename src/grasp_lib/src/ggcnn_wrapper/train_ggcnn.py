@@ -181,6 +181,23 @@ def train(epoch, net, device, train_data, optimizer, batches_per_epoch, vis=Fals
 
     return results
 
+def get_dataset(dataset_name):
+        if dataset_name == "cornell":
+            from dataset_processing.cornell_data import CornellDataset
+            Dataset = CornellDataset
+        elif dataset_name == "jacquard":
+            from dataset_processing.jacquard_data import JacquardDataset
+            Dataset = JacquardDataset
+        elif dataset_name == "custom":
+            from dataset_processing.custom_data import CustomDataset
+            Dataset = CustomDataset
+        elif dataset_name == "graspnet":
+            from dataset_processing.graspnet_data import GraspnetDataset
+            Dataset = GraspnetDataset
+        else:
+            raise NotImplementedError('Dataset Type {} is Not implemented'.format(args.dataset))
+        return Dataset
+
 
 def run():
     args = parse_args()
@@ -197,20 +214,16 @@ def run():
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)
     tb = tensorboardX.SummaryWriter(os.path.join(args.logdir, net_desc))
-
+    sys.path.append("..")
     # Load Dataset
     logging.info('Loading {} Dataset...'.format(args.dataset.title()))
-    if args.dataset in ["cornell", "jacquard"]:
-        Dataset = get_dataset(args.dataset)
-    elif args.dataset == "custom":
-        sys.path.append("..")
-        from dataset_processing.custom_data import CustomDataset
-        Dataset = CustomDataset
+    Dataset = get_dataset(args.dataset)
 
     path = {
         "cornell": "/home/slave/Documents/Datasets/Cornell",
         "custom": "/home/slave/Documents/Datasets/LH7",
-        "jacquard": "/home/slave/Documents/Datasets/Jacquard"
+        "jacquard": "/home/slave/Documents/Datasets/Jacquard",
+        "graspnet": "/home/slave/Documents/Datasets/Graspnet"
     }
     print("from train: ",path[args.dataset])
     train_dataset = Dataset(path[args.dataset], start=0.0, end=args.split, ds_rotate=args.ds_rotate,
