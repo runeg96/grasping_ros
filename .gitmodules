@@ -1,6 +1,7 @@
 [submodule "src/graspnet_baseline"]
 	path = src/graspnet_baseline
 	url = https://github.com/graspnet/graspnet-baseline.git
+	branch = main
 [submodule "src/pointnet_gpd"]
 	path = src/pointnet_gpd
 	url = https://github.com/lianghongzhuo/PointNetGPD.git
