@@ -52,7 +52,7 @@ class GraspnetDataset(GraspDatasetBase):
     def get_gtbb(self, idx, rot=0, zoom=1.0):
         gtbbs = grasp.GraspRectangles.load_from_graspnet_file(self.grasp_files[idx], scale = self.output_size / 720)
         center, left, top = self._get_crop_attrs(idx)
-        gtbbs.offset((-top//2, -100))
+        gtbbs.offset((-top//2, -120))
         gtbbs.zoom(zoom, (self.output_size//2, self.output_size//2))
         return gtbbs
 
@@ -60,11 +60,10 @@ class GraspnetDataset(GraspDatasetBase):
         depth_img = image.DepthImage.from_png(self.depth_files[idx])
         center, left, top = self._get_crop_attrs(idx)
         depth_img.crop((top, left), (720,1000))
+        depth_img.inpaint()
         depth_img.normalise()
         depth_img.zoom(zoom)
         depth_img.resize((self.output_size, self.output_size))
-        print("max: ",np.max(depth_img.img))
-        print("min: ",np.min(depth_img.img))
         return depth_img.img
 
     def get_rgb(self, idx, rot=0, zoom=1.0, normalise=True):
