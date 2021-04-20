@@ -1,7 +1,7 @@
 import os
 import glob
 counter = 0
-for i in range(99):
+for i in range(100):
     graspf = glob.glob(os.path.join("/home/slave/Documents/Datasets/Graspnet",'scene_{}'.format(str(i).zfill(4)),'realsense', '0*.npy'))
     # print(graspf)
     try:
