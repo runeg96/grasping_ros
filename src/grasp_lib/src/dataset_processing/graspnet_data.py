@@ -23,8 +23,12 @@ class GraspnetDataset(GraspDatasetBase):
         :param kwargs: kwargs for GraspDatasetBase
         """
         super(GraspnetDataset, self).__init__(**kwargs)
+        test = False
+        if test:
+            graspf = glob.glob(os.path.join(file_path, 'scene_01*', 'realsense/rect', '*.npy'))
+        else:
+            graspf = glob.glob(os.path.join(file_path, 'scene_00*', 'realsense/rect', '*.npy'))
 
-        graspf = glob.glob(os.path.join(file_path, '*', 'realsense/rect', '*.npy'))
         graspf.sort()
         l = len(graspf)
 
