@@ -124,8 +124,8 @@ class GraspRectangles:
 
             w = math.hypot(ox - x, oy - y)
             h = l[4]
-
-            grs.append(Grasp(np.array([y, x]), angle, w, h).as_gr)
+            if 280 < x < 1000 and 0 < y < 720:
+                grs.append(Grasp(np.array([y, x]), angle, w, h).as_gr)
 
             # cx, cy, ox, oy, h, q, oid
         grs = cls(grs)
