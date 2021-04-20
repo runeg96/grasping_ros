@@ -1,6 +1,7 @@
 import os
 import glob
 import sys
+import numpy as np
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(ROOT_DIR, '../../../../ggcnn'))
