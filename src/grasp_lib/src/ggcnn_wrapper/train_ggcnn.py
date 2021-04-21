@@ -10,6 +10,7 @@ sys.path.append("..")
 import cv2
 
 import torch
+import torch.nn as nn
 import torch.utils.data
 import torch.optim as optim
 
@@ -251,8 +252,9 @@ def run():
     ggcnn = get_network(args.network)
 
     net = ggcnn(input_channels=input_channels)
-    device = torch.device("cuda:0")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logging.info('Using device: {}'.format(device))
+    net = nn.DataParallel(net)
     net = net.to(device)
     optimizer = optim.Adam(net.parameters())
     logging.info('Done')
