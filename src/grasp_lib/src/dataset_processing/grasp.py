@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 from skimage.draw import polygon
 from skimage.feature import peak_local_max
+import time
 
 import math
 
@@ -112,22 +113,19 @@ class GraspRectangles:
     @classmethod
     def load_from_graspnet_file(cls, fname, scale=1.0):
         grs = []
+        t_load = time.process_time()
         f = np.load(fname)
         # f = f[0::10]
+        print("load time: ",time.process_time() - t_load)
+        t_for = time.process_time()
         for l in f:
-            x = l[0]
-            y = l[1]
-            ox = l[2]
-            oy = l[3]
-
-            angle = math.atan2(oy-y, ox-x)
-
-            w = math.hypot(ox - x, oy - y)
-            h = l[4]
+            x, y, angle, w, h = l
+            #crop out BoundingBoxes outside of image
             if 280 < x < 1000 and 0 < y < 720:
                 grs.append(Grasp(np.array([y, x]), angle, w, h).as_gr)
 
             # cx, cy, ox, oy, h, q, oid
+        print("calculate time: ",time.process_time() - t_for)
         grs = cls(grs)
 
         grs.scale(scale)
