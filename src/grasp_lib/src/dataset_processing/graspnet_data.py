@@ -40,7 +40,7 @@ class GraspnetDataset(GraspDatasetBase):
             graspf = graspf[int(l*ds_rotate):] + graspf[:int(l*ds_rotate)]
 
         depthf = [f.replace('rect', 'depth') for f in graspf]
-        depthf = [f.replace('.npy', '.png') for f in depthf]
+        depthf = [f.replace('_simple.npy', '.png') for f in depthf]
 
         rgbf = [f.replace('depth', 'rgb') for f in depthf]
 
