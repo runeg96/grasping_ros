@@ -113,11 +113,8 @@ class GraspRectangles:
     @classmethod
     def load_from_graspnet_file(cls, fname, scale=1.0):
         grs = []
-        t_load = time.process_time()
         f = np.load(fname)
         # f = f[0::10]
-        print("load time: ",time.process_time() - t_load)
-        t_for = time.process_time()
         for l in f:
             x, y, angle, w, h = l
             #crop out BoundingBoxes outside of image
@@ -125,7 +122,6 @@ class GraspRectangles:
                 grs.append(Grasp(np.array([y, x]), angle, w, h).as_gr)
 
             # cx, cy, ox, oy, h, q, oid
-        print("calculate time: ",time.process_time() - t_for)
         grs = cls(grs)
 
         grs.scale(scale)
