@@ -11,11 +11,12 @@ if test:
 else:
     graspf = glob.glob(os.path.join(file_path, 'scene_00*', 'realsense/rect', '*.npy'))
 
-for file in graspf:
+for idx, file in enumerate(graspf):
     #Load data
-    print("Processing: ", file)
     f = np.load(file)
-    
+    print("Processing: ", file)
+    print("[",idx,"/",len(graspf),"]")
+
     # alocate room for data
     array = np.zeros((len(f),5))
     for idx, l in enumerate(f):
