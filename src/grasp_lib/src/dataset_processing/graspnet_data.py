@@ -2,6 +2,7 @@ import os
 import glob
 import sys
 import numpy as np
+import time
 
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -25,9 +26,9 @@ class GraspnetDataset(GraspDatasetBase):
         super(GraspnetDataset, self).__init__(**kwargs)
         test = False
         if test:
-            graspf = glob.glob(os.path.join(file_path, 'scene_01*', 'realsense/rect', '*.npy'))
+            graspf = glob.glob(os.path.join(file_path, 'scene_01*', 'realsense/rect', '*_simple.npy'))
         else:
-            graspf = glob.glob(os.path.join(file_path, 'scene_00*', 'realsense/rect', '*.npy'))
+            graspf = glob.glob(os.path.join(file_path, 'scene_00*', 'realsense/rect', '*_simple.npy'))
 
         graspf.sort()
         l = len(graspf)
@@ -54,7 +55,9 @@ class GraspnetDataset(GraspDatasetBase):
         return center, left, top
 
     def get_gtbb(self, idx, rot=0, zoom=1.0):
+
         gtbbs = grasp.GraspRectangles.load_from_graspnet_file(self.grasp_files[idx], scale = self.output_size / 720)
+
         center, left, top = self._get_crop_attrs(idx)
         gtbbs.offset((-top//2, -120))
         gtbbs.zoom(zoom, (self.output_size//2, self.output_size//2))
