@@ -111,14 +111,14 @@ class GraspRectangles:
         return grs
 
     @classmethod
-    def load_from_graspnet_file(cls, fname, scale=1.0):
+    def load_from_graspnet_file(cls, fname, scale=1.0, mean=640):
         grs = []
         f = np.load(fname)
         f = f[0::10]
         for l in f:
             x, y, angle, w, h = l
             #crop out BoundingBoxes outside of image
-            if 280 < x < 1000 and 0 < y < 720:
+            if mean-360 < x < mean+360 and 0 < y < 720:
                 grs.append(Grasp(np.array([y, x]), angle, w, h).as_gr)
 
             # cx, cy, ox, oy, h, q, oid
