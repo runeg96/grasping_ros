@@ -3,6 +3,7 @@ import glob
 import sys
 import numpy as np
 import time
+from tqdm import tqdm
 
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -24,11 +25,29 @@ class GraspnetDataset(GraspDatasetBase):
         :param kwargs: kwargs for GraspDatasetBase
         """
         super(GraspnetDataset, self).__init__(**kwargs)
-        test = False
-        if test:
-            graspf = glob.glob(os.path.join(file_path, 'scene_01*', 'realsense/rect', '*_simple.npy'))
-        else:
-            graspf = glob.glob(os.path.join(file_path, 'scene_00*', 'realsense/rect', '*_simple.npy'))
+
+        TOTAL_SCENE_NUM = 190
+        camera = "realsense"
+        split = "train"
+        sceneIds = []
+        if split == 'all':
+            sceneIds = list(range(TOTAL_SCENE_NUM))
+        elif split == 'train':
+            sceneIds = list(range(100))
+        elif split == 'test':
+            sceneIds = list(range(100, 190))
+        elif split == 'test_seen':
+            sceneIds = list(range(100, 130))
+        elif split == 'test_similar':
+            sceneIds = list(range(130, 160))
+        elif split == 'test_novel':
+            sceneIds = list(range(160, 190))
+
+
+        graspf = []
+        for i in tqdm(sceneIds, desc='Loading data path...'):
+            for img_num in range(256):
+                graspf.append(os.path.join(file_path,'scene_'+str(i).zfill(4), camera, 'rect', str(img_num).zfill(4)+'_simple.npy'))
 
         graspf.sort()
         l = len(graspf)
@@ -43,28 +62,34 @@ class GraspnetDataset(GraspDatasetBase):
         depthf = [f.replace('_simple.npy', '.png') for f in depthf]
 
         rgbf = [f.replace('depth', 'rgb') for f in depthf]
-
+        self.mean_file = file_path+"/mean.npy"
         self.grasp_files = graspf[int(l*start):int(l*end)]
         self.depth_files = depthf[int(l*start):int(l*end)]
         self.rgb_files = rgbf[int(l*start):int(l*end)]
 
     def _get_crop_attrs(self, idx):
-        left = 280
+        f = np.load(self.mean_file)
+        center_x = int(f[idx])
+
         top = 0
-        center = (640,360)
-        return center, left, top
+        left = max(0, min(center_x - 720 // 2, 1280 - 720))
+        print("Left: ",left)
+        return center_x, left, top
 
     def get_gtbb(self, idx, rot=0, zoom=1.0):
-        gtbbs = grasp.GraspRectangles.load_from_graspnet_file(self.grasp_files[idx], scale = self.output_size / 720)
         center, left, top = self._get_crop_attrs(idx)
-        gtbbs.offset((-top//2, -120))
+        # print(center)
+        print("mean gtbb: ",center)
+        gtbbs = grasp.GraspRectangles.load_from_graspnet_file(self.grasp_files[idx], scale = self.output_size / 720, mean=center)
+        gtbbs.offset((-top, int(-left*0.416666667)))
         gtbbs.zoom(zoom, (self.output_size//2, self.output_size//2))
         return gtbbs
 
     def get_depth(self, idx, rot=0, zoom=1.0):
         depth_img = image.DepthImage.from_png(self.depth_files[idx])
         center, left, top = self._get_crop_attrs(idx)
-        depth_img.crop((top, left), (720,1000))
+        print("mean depth: ",center)
+        depth_img.crop((top, left), (min(720, top + 720), min(1280, left + 720)))
         depth_img.inpaint()
         depth_img.normalise()
         depth_img.zoom(zoom)
@@ -75,7 +100,8 @@ class GraspnetDataset(GraspDatasetBase):
         rgb_img = image.Image.from_file(self.rgb_files[idx])
         print(self.rgb_files[idx])
         center, left, top = self._get_crop_attrs(idx)
-        rgb_img.crop((top, left), (720,1000))
+        print("mean rgb: ",center)
+        rgb_img.crop((top, left), (min(720, top + 720), min(1280, left + 720)))
         rgb_img.zoom(zoom)
         rgb_img.resize((self.output_size, self.output_size))
         if normalise:
