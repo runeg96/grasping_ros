@@ -2,6 +2,9 @@
 
 <launch>
   <rosparam command="load" file="$(find grasp_lib)/cfg/visualizer.yaml" />
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find grasp_lib)/rviz/lh7_grasp_visual.rviz" />
+
   <node name="grasp_parser" pkg="grasp_lib" type="grasptype_parser.py" output="screen"/>
   <node name="visualize_grasp" pkg="grasp_lib" type="visualize_grasp.py" output="screen"/>
   <node name="pointcloud_fix" pkg="grasp_lib" type="point_sub.py" output="screen"/>
