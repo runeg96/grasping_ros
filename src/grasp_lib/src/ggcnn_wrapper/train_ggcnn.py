@@ -254,7 +254,7 @@ def run():
     net = ggcnn(input_channels=input_channels)
     device = torch.device("cuda:0")
     net = net.to(device)
-    optimizer = optim.Adam(net.parameters())
+    optimizer = optim.AdamW(net.parameters())
     logging.info('Done')
 
     # Print model architecture.
