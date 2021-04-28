@@ -4,7 +4,7 @@ import sys
 import numpy as np
 from tqdm import tqdm
 
-file_path = "/home/slave/Documents/Datasets/Graspnet"
+file_path = "/raid/Graspnet/Graspnet"
 TOTAL_SCENE_NUM = 190
 camera = "realsense"
 fric_coef_thresh = 0.4

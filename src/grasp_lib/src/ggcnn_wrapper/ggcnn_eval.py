@@ -80,7 +80,7 @@ if __name__ == '__main__':
         "cornell": "/home/slave/Documents/Datasets/Cornell",
         "custom": "/home/slave/Documents/Datasets/LH7",
         "jacquard": "/home/slave/Documents/Datasets/Jacquard",
-        "graspnet": "/home/slave/Documents/Datasets/Graspnet"
+        "graspnet": "/raid/Graspnet/Graspnet"
     }
 
     test_dataset = Dataset(dataset_path[args.dataset], start=args.split, end=1.0, ds_rotate=args.ds_rotate,
