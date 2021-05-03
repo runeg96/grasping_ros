@@ -13,7 +13,8 @@ splits = ["train", "test", "test_seen", "test_similar", "test_novel"]
 
 sceneIds = []
 
-for split in splits:
+for count, split in enumerate(splits):
+    print("Dataset: ", count,"/",len(splits))
     # select what data to be converted
     if split == 'all':
         sceneIds = list(range(TOTAL_SCENE_NUM))
