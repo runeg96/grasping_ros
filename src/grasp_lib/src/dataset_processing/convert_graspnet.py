@@ -13,7 +13,7 @@ splits = ["train", "test", "test_seen", "test_similar", "test_novel"]
 
 sceneIds = []
 
-for split in splits:
+for split in tqdm(splits):
     # select what data to be converted
     if split == 'all':
         sceneIds = list(range(TOTAL_SCENE_NUM))
