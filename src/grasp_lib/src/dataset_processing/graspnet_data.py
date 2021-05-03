@@ -30,25 +30,22 @@ class GraspnetDataset(GraspDatasetBase):
         camera = "realsense"
         split = "train"
         sceneIds = []
-        self.mean_file = file_path+"/mean.npy"
-        
+        fric = 0.2
+        self.mean_file = ""
+
         if split == 'all':
             sceneIds = list(range(TOTAL_SCENE_NUM))
         elif split == 'train':
             sceneIds = list(range(100))
-            self.mean_file = file_path+"/mean.npy"
         elif split == 'test':
             sceneIds = list(range(100, 190))
-            self.mean_file = file_path+"/test_mean.npy"
         elif split == 'test_seen':
             sceneIds = list(range(100, 130))
-            self.mean_file = file_path+"/test_seen_mean.npy"
         elif split == 'test_similar':
             sceneIds = list(range(130, 160))
-            self.mean_file = file_path+"/test_similar_mean.npy"
         elif split == 'test_novel':
             sceneIds = list(range(160, 190))
-            self.mean_file = file_path+"/test_novel_mean.npy"
+
 
 
         graspf = []
@@ -70,6 +67,7 @@ class GraspnetDataset(GraspDatasetBase):
 
         rgbf = [f.replace('depth', 'rgb') for f in depthf]
 
+        self.mean_file = file_path + "/" + split + "_mean" + fric + ".npy"
         self.grasp_files = graspf[int(l*start):int(l*end)]
         self.depth_files = depthf[int(l*start):int(l*end)]
         self.rgb_files = rgbf[int(l*start):int(l*end)]
