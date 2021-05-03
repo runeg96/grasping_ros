@@ -30,7 +30,7 @@ class GraspnetDataset(GraspDatasetBase):
         camera = "realsense"
         split = "train"
         sceneIds = []
-        fric = 0.2
+        fric = "02"
         self.mean_file = ""
 
         if split == 'all':

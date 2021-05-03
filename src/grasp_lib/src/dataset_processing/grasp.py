@@ -114,7 +114,7 @@ class GraspRectangles:
     def load_from_graspnet_file(cls, fname, scale=1.0, mean=640):
         grs = []
         f = np.load(fname)
-        f = f[0::10]
+        #f = f[0::10]
         for l in f:
             x, y, angle, w, h = l
             #crop out BoundingBoxes outside of image
