@@ -8,7 +8,7 @@ file_path = "/raid/Graspnet/Graspnet"
 TOTAL_SCENE_NUM = 190
 camera = "realsense"
 fric_coef_thresh = 0.4
-split = "train"
+split = "test_novel"
 
 sceneIds = []
 
@@ -29,13 +29,13 @@ elif split == 'test_novel':
 rectLabelPath = []
 
 # Find grasp file paths
-for i in tqdm(sceneIds, desc='Loading data path...'):
+for i in tqdm(sceneIds, desc='Loading data path split: {}'.format(split)):
     for img_num in range(256):
         rectLabelPath.append(os.path.join(file_path,'scene_'+str(i).zfill(4), camera, 'rect', str(img_num).zfill(4)+'.npy'))
 
 mean_array = np.empty(len(rectLabelPath))
 # Go though all files in scenes
-for index, file in enumerate(tqdm(rectLabelPath, desc='Converting data')):
+for index, file in enumerate(tqdm(rectLabelPath, desc='Converting data split: {}'.format(split))):
     #Load data
     f = np.load(file)
 
@@ -56,7 +56,7 @@ for index, file in enumerate(tqdm(rectLabelPath, desc='Converting data')):
 
         # Insert data in temp array
         array[idx] = [x,y,angle,w,h]
-        
+
     # Calculate mean of BoundingBoxes
     min_x = max(0, np.min(array[:,0]))
     max_x = min(1280, np.max(array[:,0]))
@@ -68,4 +68,4 @@ for index, file in enumerate(tqdm(rectLabelPath, desc='Converting data')):
     np.save(output_line,array)
 
 #Save means for all files in root dir
-np.save(file_path+"/mean.npy",mean_array)
+np.save(file_path + "/"+ split + "_mean.npy", mean_array)
