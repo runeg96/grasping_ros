@@ -223,7 +223,7 @@ def run():
         "cornell": "/home/slave/Documents/Datasets/Cornell",
         "custom": "/home/slave/Documents/Datasets/LH7",
         "jacquard": "/home/slave/Documents/Datasets/Jacquard",
-        "graspnet": "/home/slave/Documents/Datasets/Graspnet"
+        "graspnet": "/raid/Graspnet/Graspnet"
     }
     print("from train: ",path[args.dataset])
     train_dataset = Dataset(path[args.dataset], start=0.0, end=args.split, ds_rotate=args.ds_rotate,
@@ -254,7 +254,7 @@ def run():
     net = ggcnn(input_channels=input_channels)
     device = torch.device("cuda:0")
     net = net.to(device)
-    optimizer = optim.Adam(net.parameters())
+    optimizer = optim.AdamW(net.parameters())
     logging.info('Done')
 
     # Print model architecture.
