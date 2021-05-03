@@ -8,7 +8,7 @@ file_path = "/raid/Graspnet/Graspnet"
 TOTAL_SCENE_NUM = 190
 camera = "realsense"
 fric_coef_thresh = 0.2
-fric = 02
+fric = str(fric_coef_thresh).replace('.','')
 # split = "all"
 splits = ["train", "test", "test_seen", "test_similar", "test_novel"]
 
