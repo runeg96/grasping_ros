@@ -7,13 +7,13 @@ from tqdm import tqdm
 file_path = "/raid/Graspnet/Graspnet"
 TOTAL_SCENE_NUM = 190
 camera = "realsense"
-fric_coef_thresh = 0.4
+fric_coef_thresh = 0.2
 # split = "all"
 splits = ["train", "test", "test_seen", "test_similar", "test_novel"]
 
 sceneIds = []
 
-for split in tqdm(splits):
+for split in splits:
     # select what data to be converted
     if split == 'all':
         sceneIds = list(range(TOTAL_SCENE_NUM))
