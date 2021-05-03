@@ -8,6 +8,7 @@ file_path = "/raid/Graspnet/Graspnet"
 TOTAL_SCENE_NUM = 190
 camera = "realsense"
 fric_coef_thresh = 0.2
+fric = 02
 # split = "all"
 splits = ["train", "test", "test_seen", "test_similar", "test_novel"]
 
@@ -67,8 +68,8 @@ for count, split in enumerate(splits):
         mean_array[index] = mean_x
 
         #Save grasp data for each file
-        output_line = file[:-4] + '_fric02' + file[-4:]
+        output_line = file[:-4] + '_fric' + fric + file[-4:]
         np.save(output_line,array)
 
     #Save means for all files in root dir
-    np.save(file_path + "/"+ split + "_mean02.npy", mean_array)
+    np.save(file_path + "/"+ split + "_mean" + fric + ".npy", mean_array)

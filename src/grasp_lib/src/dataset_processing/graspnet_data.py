@@ -51,7 +51,7 @@ class GraspnetDataset(GraspDatasetBase):
         graspf = []
         for i in tqdm(sceneIds, desc='Loading data path...'):
             for img_num in range(256):
-                graspf.append(os.path.join(file_path,'scene_'+str(i).zfill(4), camera, 'rect', str(img_num).zfill(4)+'_simple.npy'))
+                graspf.append(os.path.join(file_path,'scene_'+str(i).zfill(4), camera, 'rect', str(img_num).zfill(4)+'_fric' + fric +'.npy'))
 
         graspf.sort()
         l = len(graspf)
