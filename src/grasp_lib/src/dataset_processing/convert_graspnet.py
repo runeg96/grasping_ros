@@ -4,15 +4,38 @@ import sys
 import numpy as np
 from tqdm import tqdm
 
-file_path = "/raid/Graspnet/Graspnet"
+file_path = "/home/slave/Documents/Datasets/Graspnet"
 TOTAL_SCENE_NUM = 190
 camera = "realsense"
-fric_coef_thresh = 0.2
+fric_coef_thresh = 0.4
 fric = str(fric_coef_thresh).replace('.','')
 # split = "all"
 splits = ["train", "test", "test_seen", "test_similar", "test_novel"]
 
 sceneIds = []
+
+def cornell_format(center, angle, width=60, height=30):
+    """
+    Convert to GraspRectangle
+    :return: GraspRectangle representation of grasp.
+    """
+    xo = np.cos(angle)
+    yo = np.sin(angle)
+
+    y1 = center[0] + width / 2 * yo
+    x1 = center[1] - width / 2 * xo
+    y2 = center[0] - width / 2 * yo
+    x2 = center[1] + width / 2 * xo
+
+    return np.array(
+        [
+         [y1 - height/2 * xo, x1 - height/2 * yo],
+         [y2 - height/2 * xo, x2 - height/2 * yo],
+         [y2 + height/2 * xo, x2 + height/2 * yo],
+         [y1 + height/2 * xo, x1 + height/2 * yo],
+         ]
+    ).astype(np.float)
+
 
 for count, split in enumerate(splits):
     print("Dataset: ", count,"/",len(splits))
@@ -37,35 +60,43 @@ for count, split in enumerate(splits):
         for img_num in range(256):
             rectLabelPath.append(os.path.join(file_path,'scene_'+str(i).zfill(4), camera, 'rect', str(img_num).zfill(4)+'.npy'))
 
-    mean_array = np.empty(len(rectLabelPath))
+    mean_array = np.empty(0)
     # Go though all files in scenes
     for index, file in enumerate(tqdm(rectLabelPath, desc='Converting data split: {}'.format(split))):
         #Load data
+
         f = np.load(file)
 
         #discard all grasps with a high friction value(Grasp force closure)
         mask = f[:,5] >= (1.1 - fric_coef_thresh)
         f = f[mask]
 
-        # alocate room for data
-        array = np.zeros((len(f),5))
+        array = []
+        x_array = np.zeros((len(f)))
 
-        # Go though all lines in file and convert to jacquard format
+        for index, l_mean in enumerate(f):
+            x, y, ox,oy ,h ,_ ,_ = l_mean
+            x_array[index] = x
+
+        min_x = max(0, np.min(np.array(x_array)))
+        max_x = min(1280, np.max(np.array(x_array)))
+        mean_x = np.mean([min_x,max_x])
+
+        if mean_x-360 < x < mean_x+360 and 0 < y < 720:
+            mean_array = np.append(mean_array,mean_x)
+
         for idx, l in enumerate(f):
             x, y, ox,oy ,h ,_ ,_ = l
 
-            # Calculate angle and width
-            angle = -np.arctan2(oy-y, ox-x)
-            w = np.hypot(ox - x, oy - y) * 2
+            if mean_x-360 < x < mean_x+360 and 0 < y < 720:
+                angle = -np.arctan2(oy-y, ox-x)
+                w = np.hypot(ox - x, oy - y) * 2
 
-            # Insert data in temp array
-            array[idx] = [x,y,angle,w,h]
+                # Insert data in temp array
+                array.append(cornell_format(np.array([y,x]),angle,w,h))
 
-        # Calculate mean of BoundingBoxes
-        min_x = max(0, np.min(array[:,0]))
-        max_x = min(1280, np.max(array[:,0]))
-        mean_x = np.mean([min_x,max_x])
-        mean_array[index] = mean_x
+        array = np.array(array)
+
 
         #Save grasp data for each file
         output_line = file[:-4] + '_fric' + fric + file[-4:]
