@@ -114,11 +114,11 @@ class GraspRectangles:
     def load_from_graspnet_file(cls, fname, scale=1.0, mean=640):
         t = time.process_time()
         f = np.load(fname, allow_pickle=True)
-        #f = f[0::10]
+        # f = f[0::10]
         grs = []
         for l in f:
             grs.append(GraspRectangle(l))
-
+        # print(len(f))
         grs = cls(grs)
 
         grs.scale(scale)
@@ -130,7 +130,7 @@ class GraspRectangles:
     #     t = time.process_time()
     #     grs = []
     #     f = np.load(fname)
-    #     #f = f[0::10]
+    #     # f = f[0::10]
     #     for l in f:
     #         x, y, angle, w, h = l
     #         #crop out BoundingBoxes outside of image

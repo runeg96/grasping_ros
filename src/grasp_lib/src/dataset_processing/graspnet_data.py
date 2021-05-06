@@ -84,7 +84,7 @@ class GraspnetDataset(GraspDatasetBase):
     def get_gtbb(self, idx, rot=0, zoom=1.0):
         center, left, top = self._get_crop_attrs(idx)
         gtbbs = grasp.GraspRectangles.load_from_graspnet_file(self.grasp_files[idx], scale = self.output_size / 720, mean=center)
-        gtbbs.offset((-top, int(-left*0.416666667)))
+        gtbbs.offset((-top, int(-left*(self.output_size / 720))))
         gtbbs.zoom(zoom, (self.output_size//2, self.output_size//2))
         return gtbbs
 

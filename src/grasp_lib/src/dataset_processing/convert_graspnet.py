@@ -60,7 +60,7 @@ for count, split in enumerate(splits):
         for img_num in range(256):
             rectLabelPath.append(os.path.join(file_path,'scene_'+str(i).zfill(4), camera, 'rect', str(img_num).zfill(4)+'.npy'))
 
-    mean_array = np.empty(0)
+    mean_array = np.zeros(len(rectLabelPath))
     # Go though all files in scenes
     for index, file in enumerate(tqdm(rectLabelPath, desc='Converting data split: {}'.format(split))):
         #Load data
@@ -81,21 +81,26 @@ for count, split in enumerate(splits):
         min_x = max(0, np.min(np.array(x_array)))
         max_x = min(1280, np.max(np.array(x_array)))
         mean_x = np.mean([min_x,max_x])
-
-        if mean_x-360 < x < mean_x+360 and 0 < y < 720:
-            mean_array = np.append(mean_array,mean_x)
-
+        mean_array[index] = mean_x
+        # print("mean: ",mean_array[index])
         for idx, l in enumerate(f):
             x, y, ox,oy ,h ,_ ,_ = l
 
-            if mean_x-360 < x < mean_x+360 and 0 < y < 720:
+            # print("x: ", x)
+            if mean_array[index] - 360 < x < mean_array[index] + 360 and 0 < y < 720:
+                # print("YES")
                 angle = -np.arctan2(oy-y, ox-x)
                 w = np.hypot(ox - x, oy - y) * 2
 
                 # Insert data in temp array
                 array.append(cornell_format(np.array([y,x]),angle,w,h))
+            else:
+                pass
+                print("x: ", x , "y: ",y)
 
         array = np.array(array)
+        print("Len of array",len(array))
+        print("len of file",len(f))
 
 
         #Save grasp data for each file
