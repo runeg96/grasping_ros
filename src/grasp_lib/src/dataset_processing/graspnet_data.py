@@ -30,7 +30,7 @@ class GraspnetDataset(GraspDatasetBase):
         camera = "realsense"
         split = "train"
         sceneIds = []
-        fric = "02"
+        fric = "04"
         self.mean_file = ""
 
         if split == 'all':
@@ -52,6 +52,7 @@ class GraspnetDataset(GraspDatasetBase):
         for i in tqdm(sceneIds, desc='Loading data path...'):
             for img_num in range(256):
                 graspf.append(os.path.join(file_path,'scene_'+str(i).zfill(4), camera, 'rect', str(img_num).zfill(4)+'_fric' + fric +'.npy'))
+                # graspf.append(os.path.join(file_path,'scene_'+str(i).zfill(4), camera, 'rect', str(img_num).zfill(4)+'_simple'+'.npy'))
 
         graspf.sort()
         l = len(graspf)
@@ -64,6 +65,7 @@ class GraspnetDataset(GraspDatasetBase):
 
         depthf = [f.replace('rect', 'depth') for f in graspf]
         depthf = [f.replace('_fric' + fric + '.npy', '.png') for f in depthf]
+        # depthf = [f.replace('_simple' + '.npy', '.png') for f in depthf]
 
         rgbf = [f.replace('depth', 'rgb') for f in depthf]
 
