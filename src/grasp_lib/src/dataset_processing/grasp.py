@@ -111,7 +111,7 @@ class GraspRectangles:
         return grs
 
     @classmethod
-    def load_from_graspnet_file(cls, fname, scale=1.0, mean=640):
+    def load_from_graspnet_file(cls, fname, scale=1.0):
         t = time.process_time()
         f = np.load(fname, allow_pickle=True)
         # f = f[0::10]
