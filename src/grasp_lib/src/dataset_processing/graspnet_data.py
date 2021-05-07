@@ -91,9 +91,9 @@ class GraspnetDataset(GraspDatasetBase):
     def get_depth(self, idx, rot=0, zoom=1.0):
         depth_img = image.DepthImage.from_png(self.depth_files[idx])
         center, left, top = self._get_crop_attrs(idx)
-        print("Image: ",self.rgb_files[idx], "center: ",center)
+        # print("Image: ",self.rgb_files[idx], "center: ",center)
         depth_img.crop((top, left), (min(720, top + 720), min(1280, left + 720)))
-        # depth_img.inpaint_graspnet()
+        depth_img.inpaint_graspnet()
         depth_img.normalise()
         depth_img.zoom(1.0)
         depth_img.resize((self.output_size, self.output_size))

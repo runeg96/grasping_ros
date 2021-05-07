@@ -112,7 +112,7 @@ class GraspRectangles:
 
     @classmethod
     def load_from_graspnet_file(cls, fname, scale=1.0):
-        t = time.process_time()
+        # t = time.process_time()
         f = np.load(fname, allow_pickle=True)
         # f = f[0::10]
         grs = []
@@ -122,7 +122,7 @@ class GraspRectangles:
         grs = cls(grs)
 
         grs.scale(scale)
-        print("Time of fucntion ms: ",(time.process_time() - t) * 1000)
+        # print("Time of fucntion ms: ",(time.process_time() - t) * 1000)
         return grs
 
     # @classmethod
