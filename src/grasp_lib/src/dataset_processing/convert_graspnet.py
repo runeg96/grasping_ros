@@ -63,44 +63,29 @@ for count, split in enumerate(splits):
     mean_array = np.zeros(len(rectLabelPath))
     # Go though all files in scenes
     for index, file in enumerate(tqdm(rectLabelPath, desc='Converting data split: {}'.format(split))):
-        #Load data
 
+        array = []
+
+        #Load data
         f = np.load(file)
 
         #discard all grasps with a high friction value(Grasp force closure)
         mask = f[:,5] >= (1.1 - fric_coef_thresh)
         f = f[mask]
 
-        array = []
-        x_array = np.zeros((len(f)))
+        mean_array[index] = np.mean(f[:,0])
 
-        for index, l_mean in enumerate(f):
-            x, y, ox,oy ,h ,_ ,_ = l_mean
-            x_array[index] = x
-
-        min_x = max(0, np.min(np.array(x_array)))
-        max_x = min(1280, np.max(np.array(x_array)))
-        mean_x = np.mean([min_x,max_x])
-        mean_array[index] = mean_x
-        # print("mean: ",mean_array[index])
-        for idx, l in enumerate(f):
+        for l in f:
             x, y, ox,oy ,h ,_ ,_ = l
-
-            # print("x: ", x)
             if mean_array[index] - 360 < x < mean_array[index] + 360 and 0 < y < 720:
-                # print("YES")
+
                 angle = -np.arctan2(oy-y, ox-x)
                 w = np.hypot(ox - x, oy - y) * 2
 
                 # Insert data in temp array
                 array.append(cornell_format(np.array([y,x]),angle,w,h))
-            else:
-                pass
-                print("x: ", x , "y: ",y)
 
         array = np.array(array)
-        print("Len of array",len(array))
-        print("len of file",len(f))
 
 
         #Save grasp data for each file
