@@ -12,7 +12,8 @@ import torch
 ROOT_DIR = path.dirname(path.abspath(__file__))
 sys.path.append(path.join(ROOT_DIR, '../../../ggcnn'))
 
-MODEL_FILE = '../../resources/ggcnn_models/epoch_37_iou_0.78'
+# MODEL_FILE = '../../resources/ggcnn_models/Cornell/epoch_495_iou_0.82'
+MODEL_FILE = '/home/slave/Documents/workspaces/handover_ws/src/lh7-handover/grasping_ros/src/grasp_lib/src/ggcnn_wrapper/output/models/210428_1116_adamw/epoch_39_iou_0.94'
 
 if torch.cuda.is_available():
     device = torch.device('cuda:0')

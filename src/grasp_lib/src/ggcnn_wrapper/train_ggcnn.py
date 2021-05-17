@@ -103,10 +103,10 @@ def validate(net, device, val_data, batches_per_epoch):
                                                         lossd['pred']['sin'], lossd['pred']['width'])
 
             s = evaluation.calculate_iou_match(q_out, ang_out,
-                                                val_data.dataset.get_gtbb(didx, rot, zoom_factor),
-                                                no_grasps=1,
-                                                grasp_width=w_out,
-                                                )
+                                               val_data.dataset.get_gtbb(didx, rot, zoom_factor),
+                                               no_grasps=1,
+                                               grasp_width=w_out,
+                                               )
 
             if s:
                 results['correct'] += 1
@@ -171,8 +171,8 @@ def train(epoch, net, device, train_data, optimizer, batches_per_epoch, vis=Fals
                 imgs.extend([x[idx,].numpy().squeeze()] + [yi[idx,].numpy().squeeze() for yi in y] + [
                     x[idx,].numpy().squeeze()] + [pc[idx,].detach().cpu().numpy().squeeze() for pc in lossd['pred'].values()])
             gridshow('Display', imgs,
-                        [(xc.min().item(), xc.max().item()), (0.0, 1.0), (0.0, 1.0), (-1.0, 1.0), (0.0, 1.0)] * 2 * n_img,
-                        [cv2.COLORMAP_BONE] * 10 * n_img, 10)
+                     [(xc.min().item(), xc.max().item()), (0.0, 1.0), (0.0, 1.0), (-1.0, 1.0), (0.0, 1.0)] * 2 * n_img,
+                     [cv2.COLORMAP_BONE] * 10 * n_img, 10)
             cv2.waitKey(2)
 
     results['loss'] /= batch_idx

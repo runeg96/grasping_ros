@@ -111,21 +111,37 @@ class GraspRectangles:
         return grs
 
     @classmethod
-    def load_from_graspnet_file(cls, fname, scale=1.0, mean=640):
+    def load_from_graspnet_file(cls, fname, scale=1.0):
+        # t = time.process_time()
+        f = np.load(fname, allow_pickle=True)
+        # f = f[0::10]
         grs = []
-        f = np.load(fname)
-        f = f[0::10]
         for l in f:
-            x, y, angle, w, h = l
-            #crop out BoundingBoxes outside of image
-            if mean-360 < x < mean+360 and 0 < y < 720:
-                grs.append(Grasp(np.array([y, x]), angle, w, h).as_gr)
-
-            # cx, cy, ox, oy, h, q, oid
+            grs.append(GraspRectangle(l))
+        # print(len(f))
         grs = cls(grs)
 
         grs.scale(scale)
+        # print("Time of fucntion ms: ",(time.process_time() - t) * 1000)
         return grs
+
+    # @classmethod
+    # def load_from_graspnet_file(cls, fname, scale=1.0, mean=640):
+    #     t = time.process_time()
+    #     grs = []
+    #     f = np.load(fname)
+    #     # f = f[0::10]
+    #     for l in f:
+    #         x, y, angle, w, h = l
+    #         #crop out BoundingBoxes outside of image
+    #         if mean-360 < x < mean+360 and 0 < y < 720:
+    #             grs.append(Grasp(np.array([y, x]), angle, w, h).as_gr)
+    #
+    #     grs = cls(grs)
+    #
+    #     grs.scale(scale)
+    #     print("Time of fucntion ms: ",(time.process_time() - t) * 1000)
+    #     return grs
 
     def append(self, gr):
         """
