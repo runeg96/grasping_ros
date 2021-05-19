@@ -78,7 +78,7 @@ if __name__ == '__main__':
 
     dataset_path = {
         "cornell": "/home/slave/Documents/Datasets/Cornell",
-        "custom": "/home/slave/Documents/Datasets/LH7",
+        "custom": "/home/slave/Documents/Datasets/multi-view-dataset-converted",
         "jacquard": "/home/slave/Documents/Datasets/Jacquard",
         "graspnet": "/raid/Graspnet/Graspnet"
     }

@@ -79,23 +79,27 @@ class GraspnetDataset(GraspDatasetBase):
         center_x = int(self.mean_file[idx])
         top = 0
         left = max(0, min(center_x - 720 // 2, 1280 - 720))
-        return center_x, left, top
+        center = (360,center_x)
+        return center, left, top
 
     def get_gtbb(self, idx, rot=0, zoom=1.0):
         center, left, top = self._get_crop_attrs(idx)
         gtbbs = grasp.GraspRectangles.load_from_graspnet_file(self.grasp_files[idx], scale = self.output_size / 720)
-        gtbbs.offset((-top, int(-left*(self.output_size / 720))))
-        # gtbbs.zoom(zoom, (self.output_size//2, self.output_size//2))
+        center = (center[0] * (self.output_size / 720), center[1] * (self.output_size / 720))
+        gtbbs.rotate(rot, center)
+        gtbbs.offset((-top*(self.output_size / 720), int(-left*(self.output_size / 720))))
+        gtbbs.zoom(zoom, (self.output_size//2, self.output_size//2))
         return gtbbs
 
     def get_depth(self, idx, rot=0, zoom=1.0):
         depth_img = image.DepthImage.from_png(self.depth_files[idx])
         center, left, top = self._get_crop_attrs(idx)
         # print("Image: ",self.rgb_files[idx], "center: ",center)
+        depth_img.rotate(rot, center)
         depth_img.crop((top, left), (min(720, top + 720), min(1280, left + 720)))
         depth_img.inpaint_graspnet()
         depth_img.normalise()
-        depth_img.zoom(1.0)
+        depth_img.zoom(zoom)
         depth_img.resize((self.output_size, self.output_size))
         return depth_img.img
 
@@ -103,6 +107,7 @@ class GraspnetDataset(GraspDatasetBase):
         rgb_img = image.Image.from_file(self.rgb_files[idx])
         # print(self.rgb_files[idx])
         center, left, top = self._get_crop_attrs(idx)
+        depth_img.rotate(rot, center)
         rgb_img.crop((top, left), (min(720, top + 720), min(1280, left + 720)))
         rgb_img.zoom(zoom)
         rgb_img.resize((self.output_size, self.output_size))

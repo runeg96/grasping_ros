@@ -50,7 +50,7 @@ def parse_args():
     # Logging etc.
     parser.add_argument('--description', type=str, default='', help='Training description')
     parser.add_argument('--outdir', type=str, default='output/models/', help='Training Output Directory')
-    parser.add_argument('--logdir', type=str, default='tensorboard/', help='Log directory')
+    parser.add_argument('--logdir', type=str, default='logs/', help='Log directory')
     parser.add_argument('--vis', action='store_true', help='Visualise the training process')
 
     args = parser.parse_args()
@@ -221,9 +221,9 @@ def run():
 
     path = {
         "cornell": "/home/slave/Documents/Datasets/Cornell",
-        "custom": "/home/slave/Documents/Datasets/LH7",
+        "custom": "/home/slave/Documents/Datasets/multi-view-dataset-converted",
         "jacquard": "/home/slave/Documents/Datasets/Jacquard",
-        "graspnet": "/raid/Graspnet/Graspnet"
+        "graspnet": "/home/slave/Documents/Datasets/Graspnet"
     }
     print("from train: ",path[args.dataset])
     train_dataset = Dataset(path[args.dataset], start=0.0, end=args.split, ds_rotate=args.ds_rotate,

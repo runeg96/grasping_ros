@@ -63,7 +63,7 @@ class GraspRectangles:
         return cls(grs)
 
     @classmethod
-    def load_from_cornell_file(cls, fname):
+    def load_from_cornell_file(cls, fname, scale=1.0):
         """
         Load grasp rectangles from a Cornell dataset grasp file.
         :param fname: Path to text file.
@@ -83,14 +83,16 @@ class GraspRectangles:
                         _gr_text_to_no(p1),
                         _gr_text_to_no(p2),
                         _gr_text_to_no(p3)
-                    ])
+                    ]).astype(np.float32)
 
                     grs.append(GraspRectangle(gr))
 
                 except ValueError:
                     # Some files contain weird values.
                     continue
-        return cls(grs)
+        grs = cls(grs)
+        grs.scale(scale)
+        return grs
 
     @classmethod
     def load_from_jacquard_file(cls, fname, scale=1.0):
@@ -334,7 +336,7 @@ class GraspRectangle:
         Offset grasp rectangle
         :param offset: array [y, x] distance to offset
         """
-        self.points += np.array(offset).reshape((1, 2))
+        self.points += np.array(offset).reshape((1, 2)).astype(np.int64)
 
     def rotate(self, angle, center):
         """
