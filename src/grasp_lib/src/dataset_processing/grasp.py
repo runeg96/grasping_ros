@@ -70,7 +70,6 @@ class GraspRectangles:
         :return: GraspRectangles()
         """
         grs = []
-        print(scale)
         with open(fname) as f:
             while True:
                 # Load 4 lines at a time, corners of bounding box.
