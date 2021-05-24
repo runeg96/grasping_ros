@@ -56,8 +56,9 @@ class CustomDataset(GraspDatasetBase):
     def get_gtbb(self, idx, rot=0, zoom=1.0):
         gtbbs = grasp.GraspRectangles.load_from_cornell_file(self.grasp_files[idx], scale = self.output_size / 480)
         center, left, top = self._get_crop_attrs(idx)
+        center = (center[0] * (self.output_size / 480), center[1] * (self.output_size / 480))
         gtbbs.rotate(rot, center)
-        gtbbs.offset((-top, -left*(self.output_size / 480)))
+        gtbbs.offset((-top*(self.output_size / 480), -left*(self.output_size / 480)))
         gtbbs.zoom(zoom, (self.output_size//2, self.output_size//2))
         return gtbbs
 
