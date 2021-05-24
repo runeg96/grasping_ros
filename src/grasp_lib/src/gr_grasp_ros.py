@@ -27,6 +27,8 @@ from inference.post_process import post_process_output
 from utils.dataset_processing.grasp import detect_grasps
 from utils.data.camera_data import CameraData
 
+import cv2
+
 
 logging.basicConfig(level=logging.INFO)
 
@@ -37,9 +39,9 @@ def parse_args():
                         help='Path to saved network to evaluate')
     parser.add_argument('--use-depth', type=int, default=1,
                         help='Use Depth image for evaluation (1/0)')
-    parser.add_argument('--use-rgb', type=int, default=1,
+    parser.add_argument('--use-rgb', type=int, default=0,
                         help='Use RGB image for evaluation (1/0)')
-    parser.add_argument('--n-grasps', type=int, default=10,
+    parser.add_argument('--n-grasps', type=int, default=1,
                         help='Number of grasps to consider per image')
     parser.add_argument('--cpu', dest='force_cpu', action='store_true', default=False,
                         help='Force code to run in CPU mode')
@@ -57,6 +59,7 @@ def parse_grasp_to_rviz(grasp_center, width_pixel, quality, angle):
         vis_grasp.width_pixel = width_pixel
         vis_grasp.quality = quality
         grasp_pub.publish(vis_grasp)
+
 
 def parse_grasps_to_rviz(grasps):
     temp_grasp = Grasp()
@@ -77,6 +80,23 @@ def parse_grasps_to_rviz(grasps):
 
     grasps_pub.publish(vis_grasps)
 
+def numpy_to_imgmsg(image, stamp=None):
+
+    rosimage = Image()
+    rosimage.height = image.shape[0]
+    rosimage.width = image.shape[1]
+    if image.dtype == np.uint8:
+        rosimage.encoding = '8UC3'
+        rosimage.data = image.ravel().tolist()
+        rosimage.step = len(rosimage.data) // rosimage.height
+    else:
+        rosimage.encoding = '32FC1'
+        rosimage.data = np.array(image.flat, dtype=np.float32).tostring()
+        rosimage.step = len(rosimage.data) // rosimage.height
+    if stamp is not None:
+        rosimage.header.stamp = stamp
+    return rosimage
+
 
 if __name__ == '__main__':
     args = parse_args()
@@ -84,6 +104,7 @@ if __name__ == '__main__':
     rospy.init_node("gr_grasp_ros")
     grasp_pub = rospy.Publisher(rospy.get_param("visualize_grasp/input/grasp_topic"), Grasp, queue_size=1)
     grasps_pub = rospy.Publisher(rospy.get_param("visualize_grasp/input/grasps_topic"), Grasps, queue_size=1)
+    grasp_img_pub = rospy.Publisher('ggcnn/img/grasp', Image, queue_size=1)
     cam_data = CameraData(include_depth=args.use_depth, include_rgb=args.use_rgb)
     # Load Network
     logging.info('Loading model...')
@@ -102,14 +123,24 @@ if __name__ == '__main__':
         depth_image = np.frombuffer(depth_msg.data, dtype=np.uint16).reshape(depth_msg.height, depth_msg.width,-1)
         depth_image = depth_image.astype(np.float32)/1000
 
-        x, depth_img, rgb_img = cam_data.get_data(rgb=rgb_image, depth=depth_image)
+        x, depth_img, rgb_img = cam_data.get_data(rgb=None, depth=depth_image)
 
         with torch.no_grad():
             xc = x.to(device)
             pred = net.predict(xc)
 
             q_img, ang_img, width_img = post_process_output(pred['pos'], pred['cos'], pred['sin'], pred['width'])
-
+            q_img = np.clip(q_img, 0.0, 1.0-1e-3)
             grasps = detect_grasps(q_img, ang_img, width_img,args.n_grasps)
-            parse_grasp_to_rviz(grasps[0].center,grasps[0].width, grasps[0].quality, grasps[0].angle)
-            parse_grasps_to_rviz(grasps)
+
+            grasp_img = cv2.applyColorMap((q_img*255).astype(np.uint8), cv2.COLORMAP_JET)
+
+            grasp_img = numpy_to_imgmsg(grasp_img)
+            grasp_img.header = depth_msg.header
+            grasp_img_pub.publish(grasp_img)
+            # print(grasps)
+            try:
+                parse_grasp_to_rviz(grasps[0].center,grasps[0].width, grasps[0].quality, grasps[0].angle)
+                parse_grasps_to_rviz(grasps)
+            except Exception as e:
+                print(e)
