@@ -29,7 +29,7 @@ def draw_grasp(grasp, image, camInfo):
     Points.append(grasp_center)
 
     width_img = grasp.width_pixel
-    yaw = grasp.pose2D.theta
+    yaw = grasp.pose2D.theta + 1.5707
 
     # Calculate end points of gripper fingers (based on width and angle)
     Points.append((grasp_center[0]-math.cos(yaw)*width_img, grasp_center[1]-math.sin(yaw)*width_img))
