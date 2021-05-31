@@ -23,11 +23,12 @@ class CustomDataset(GraspDatasetBase):
         """
         super(CustomDataset, self).__init__(**kwargs)
 
-        split = "top"
+        split = "head"
         if split == 'all':
             graspf = self.grasp_files = glob.glob(os.path.join(file_path, '*_annotations.txt'))
         else:
             graspf = self.grasp_files = glob.glob(os.path.join(file_path, '*_{}_annotations.txt'.format(split)))
+            print("Using {} dataset".format(split))
 
         self.length = len(graspf)
         graspf.sort()
