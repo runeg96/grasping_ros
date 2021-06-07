@@ -16,7 +16,7 @@ The project is a sub-system of the Little Helper 7+ dual-arm robot from Aalborg 
 
 ## Overview
 
-This repository consist of many different sub-modules which all relate to antipodal robotic grasping based on deep learning. A description of each folder follows:
+This repository consist of many different sub-modules and folders inside the src folder, which all relate to antipodal robotic grasping based on deep learning. A description of each folder follows:
 
   - [**ggcnn**](https://github.com/dougsm/ggcnn): Generative Grasping CNN (GG-CNN) [Untouched].
   - [**gpd**](https://github.com/Janx1913/gpd/tree/b7dc050d50b48a82ac1ee77ee7eaccae47b9aa1f): Grasp Pose Detection (GPD) [Forked].
