@@ -1,6 +1,6 @@
 # grasping_ros
 
-This repository is part of a semester project from group 1061 from the Robotics MSc program, and is based on the master thesis: ***Human-to-Robot Handovers Based on Visual Data for Optimisation of Industrial Tasks***. 
+This repository is part of a semester project from group 1061 from the Robotics MSc program, and is developed in relation to the master thesis: ***Human-to-Robot Handovers Based on Visual Data for Optimisation of Industrial Tasks***. 
 
 The project is a sub-system of the Little Helper 7+ dual-arm robot from Aalborg university, which is developed using ROS Melodic (Ubuntu 18.04), see the main repo [**LH7+**](https://bitbucket.org/masterrob/lh7-handover/src/main/).
 
