@@ -21,6 +21,7 @@ This repository consist of many different sub-modules and folders inside the src
   - [**ggcnn**](https://github.com/dougsm/ggcnn): Generative Grasping CNN (GG-CNN) [*Untouched*].
   - [**gpd**](https://github.com/Janx1913/gpd/tree/b7dc050d50b48a82ac1ee77ee7eaccae47b9aa1f): Grasp Pose Detection (GPD) [*Forked*].
   - [**gpd_ros**](https://github.com/Janx1913/gpd_ros/tree/205e186f8433e6a05b2d6283b7a02d3be191260f): ROS Wrapper for GPD [*Forked*].
+  - [**gr_grasp**](https://github.com/runeg96/robotic-grasping/tree/038a5723b54300cf3dfa1663aa8a9b49f3606218): Antipodal Robotic Grasping [*Forked*]    
   - **grasp_lib**: Custom LH7 grasping library, with visualizer and wrapper for multiple methods and interfacing with LH7 robot.
   - [**grasp_multiObject_multiGrasp**](https://github.com/ivalab/grasp_multiObject_multiGrasp/tree/806ad3d71c2f413a74294fe75fe26ba4f32c8813): Real-world Multi-object, Multi-grasp Detection [*Untouched*].
   - [**graspnetAPI**](https://github.com/graspnet/graspnetAPI/tree/f312d7e2a73ca97f9e791cf3f1ab3aeacebac3e9): API for working with the Graspnet data-set and Graspnet Baseline [*Untouched*].
@@ -47,3 +48,44 @@ This loads a special rviz configuration that is already subscribed to the releva
 ### Grasp Generation
 
 Inside the launch folder in *grasp_lib*, launch files for launching different grasping networks (inference) can be found. Some default models are available; however, some might need to be trained from scratch or downloaded from the original repos. The specific model can be specified in each launch file. 
+
+```shell
+roslaunch grasp_lib ???
+```
+
+
+## Training and Evaluation
+
+The networks *ggcnn* and *gr_grasp*, have both been modified for training and evaluation for this project. In addition to training on the Cornell and the Jacquard datasets, the Graspnet dataset have been implemented as an option.
+
+
+### Datasets
+
+To get the datasets they can be downloaded from different places.
+
+#### Cornell
+
+1. As [the official Cornell Dataset website](http://pr.cs.cornell.edu/grasping/rect_data/data.php) has been down for a while, it is recommended to download the dataset from [this Kaggle page](https://www.kaggle.com/oneoneliu/cornell-grasp).
+2. Extract the dataset and convert the PCD files to depth images by running `python -m utils.dataset_processing.generate_cornell_depth <Path To Dataset>`, from the gr_grasp submodule.
+
+#### Jacquard
+
+1. Download and extract the [Jacquard Dataset](https://jacquard.liris.cnrs.fr/).
+
+#### Graspnet
+
+1. Download and extract *Train Images*, *Test_Images* and *Rectangle Grasp Labels* from the [Graspnet Dataset](https://graspnet.net/datasets.html).
+2. Structure the data as explained in the *Format* section on the dataset website.
+3. Convert the dataset `python ???`
+
+### Training
+
+```shell
+python ???
+```
+
+### Evaluation
+
+```shell
+python ???
+```
