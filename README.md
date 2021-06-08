@@ -74,17 +74,51 @@ To get the datasets they can be downloaded from different places.
 
 #### Graspnet
 
-1. Download and extract *Train Images*, *Test_Images* and *Rectangle Grasp Labels* from the [Graspnet Dataset](https://graspnet.net/datasets.html).
-2. Structure the data as explained in the *Format* section on the dataset website.
-3. Convert the dataset `python ???`
+1. Download and extract *Train Images*, *Test Images* and *Rectangle Grasp Labels* from the [Graspnet Dataset](https://graspnet.net/datasets.html).
+2. Structure the data as explained in the *Format* section on the dataset website. A simplified version is seen below, with the minimum required files.
+3. Convert the dataset `python convert_graspnet.py --dataset-path <Path To Dataset> --fric-coef 0.4`
+
+```shell
+|-- scenes
+    |-- scene_0000
+    |   |-- realsense                       # data of realsense camera
+    |   |   |-- rgb                         
+    |   |   |   |-- 0000.png to 0255.png    # 256 rgb images
+    |   |   `-- depth
+    |   |   |   |-- 0000.png to 0255.png    # 256 depth images
+    |   |   `-- rect
+    |   |   |   |-- 0000.npy to 0255.npy    # 256 2D planar grasp labels
+    |   |   |   
+    |   `-- kinect
+    |       |-- same structure as realsense
+    |
+    `-- scene_0001
+    |
+    `-- ... ...
+    |
+    `-- scene_0189
+```
 
 ### Training
+
+To train *ggcnn* or *gr_grasp* on a set of data, the following has to be run respectively:
+
+```shell
+python ???
+```
 
 ```shell
 python ???
 ```
 
 ### Evaluation
+
+To evaluate *ggcnn* or *gr_grasp* on a dataset, the following has to be run respectively:
+
+
+```shell
+python ???
+```
 
 ```shell
 python ???
