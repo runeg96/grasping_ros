@@ -16,7 +16,7 @@ The project is a sub-system of the Little Helper 7+ dual-arm robot from Aalborg 
 
 ## Overview
 
-This repository consist of many different sub-modules and folders inside the src folder, which all relate to antipodal robotic grasping based on deep learning. A description of each folder follows:
+This repository consist of different sub-modules and folders inside the src folder, which all relate to antipodal robotic grasping based on deep learning. A description of each folder follows:
 
   - [**ggcnn**](https://github.com/dougsm/ggcnn): Generative Grasping CNN (GG-CNN) [*Untouched*].
   - [**gpd**](https://github.com/Janx1913/gpd/tree/b7dc050d50b48a82ac1ee77ee7eaccae47b9aa1f): Grasp Pose Detection (GPD) [*Forked*].
@@ -66,7 +66,7 @@ To get the datasets they can be downloaded from different places.
 #### Cornell
 
 1. As [the official Cornell Dataset website](http://pr.cs.cornell.edu/grasping/rect_data/data.php) has been down for a while, it is recommended to download the dataset from [this Kaggle page](https://www.kaggle.com/oneoneliu/cornell-grasp).
-2. Extract the dataset and convert the PCD files to depth images by running `python -m utils.dataset_processing.generate_cornell_depth <Path To Dataset>`, from the gr_grasp submodule.
+2. Extract the dataset and convert the PCD files to depth images by running `python -m utils.dataset_processing.generate_cornell_depth <Path To Dataset>`, from the *gr_grasp* submodule.
 
 #### Jacquard
 
@@ -76,7 +76,7 @@ To get the datasets they can be downloaded from different places.
 
 1. Download and extract *Train Images*, *Test Images* and *Rectangle Grasp Labels* from the [Graspnet Dataset](https://graspnet.net/datasets.html).
 2. Structure the data as explained in the *Format* section on the dataset website. A simplified version is seen below, with the minimum required files.
-3. Convert the dataset `python convert_graspnet.py --dataset-path <Path To Dataset> --fric-coef 0.4`
+3. Convert the dataset using `python convert_graspnet.py --dataset-path <Path To Dataset> --fric-coef 0.4` from *grasp_lib/src/dataset_processing*
 
 ```shell
 |-- scenes
