@@ -225,7 +225,7 @@ def run():
         "jacquard": "/home/slave/Documents/Datasets/Jacquard",
         "graspnet": "/raid/Graspnet/Graspnet"
     }
-    print("from train: ",path[args.dataset])
+    print("from train: ", path[args.dataset])
     train_dataset = Dataset(path[args.dataset], start=0.0, end=args.split, ds_rotate=args.ds_rotate,
                             random_rotate=True, random_zoom=True,
                             include_depth=args.use_depth, include_rgb=args.use_rgb)

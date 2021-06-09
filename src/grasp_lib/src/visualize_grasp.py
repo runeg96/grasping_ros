@@ -49,7 +49,7 @@ def draw_grasp(grasp, image, camInfo):
             point = (int(x) for x in point)
 
             point = list(point)
-            #Make sure points stay within image
+            # Make sure points stay within image
             point[0] = point[0] if point[0] < camInfo.width else camInfo.width -1
             point[1] = point[1] if point[1] < camInfo.height else camInfo.height -1
             point[0] = point[0] if point[0] > 0 else 1
@@ -58,7 +58,6 @@ def draw_grasp(grasp, image, camInfo):
             cv.circle(image, tuple(point), camInfo.height/180*3, (0, 0, 255), -1)
     except Exception as e:
         pass
-
 
     # Draw rectangle
     cv.drawContours(image, [np.array(Points[3:]).astype(int)], 0, (255,0,0), camInfo.height/180)
@@ -69,7 +68,6 @@ def draw_grasp(grasp, image, camInfo):
 
     img_msg = bridge.cv2_to_imgmsg(im_rgb, encoding="passthrough")
     image_pub.publish(img_msg)
-
 
 
 def create_grasp_markers(grasp, g_num, type="gripper"):
@@ -141,9 +139,11 @@ def image_callback(msg):
     global img
     img = bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
 
+
 def depth_callback(msg):
     global depth
     depth = bridge.imgmsg_to_cv2(msg, desired_encoding='32FC1')
+
 
 def fill_grasp(grasp):
     global ci, depth
@@ -184,7 +184,7 @@ def fill_grasp(grasp):
 
 def publish_names():
     methods = ["gr", "ggcnn", "vgn", "baseline"]
-    wid = 200;
+    wid = 200
     names = np.zeros((100, wid*len(methods), 3), np.uint8)
 
     for i in range(len(methods)):

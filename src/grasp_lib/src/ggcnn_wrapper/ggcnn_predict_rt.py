@@ -7,12 +7,10 @@ import cv2
 from skimage.draw import circle
 from skimage.feature import peak_local_max
 
-# from cv_bridge import CvBridge
 from sensor_msgs.msg import Image, CameraInfo
 from std_msgs.msg import Float32MultiArray
 from ggcnn_torch import predict
 
-# bridge = CvBridge()
 
 rospy.init_node('ggcnn_detection')
 
@@ -36,6 +34,7 @@ cx = K[2]
 fy = K[4]
 cy = K[5]
 
+
 def numpy_to_imgmsg(image, stamp=None):
 
     rosimage = Image()
@@ -53,22 +52,21 @@ def numpy_to_imgmsg(image, stamp=None):
         rosimage.header.stamp = stamp
     return rosimage
 
+
 def depth_callback(depth_msg):
 
     global prev_mp
     global fx, cx, fy, cy
 
-    # depth = bridge.imgmsg_to_cv2(depth_message, desired_encoding="32FC1")
     depth = np.frombuffer(depth_msg.data, dtype=np.uint16).reshape(depth_msg.height, depth_msg.width)
     depth = depth.astype(np.float32)/1000
     # depth = depth/1000
-    #  Crop a square out of the middle of the depth and resize it to 300*300
+    # Crop a square out of the middle of the depth and resize it to 300*300
     crop_size = 300
     crop_offset = 40
     out_size = 300
 
     points_out, ang_out, width_out, depth_crop = predict(depth, crop_size=crop_size, out_size=out_size, crop_y_offset=crop_offset, filters=(2.0, 2.0, 2.0))
-
 
     # Figure out roughly the depth in mm of the part between the grippers for collision avoidance.
     depth_center = depth_crop[100:141, 130:171].flatten()
@@ -106,13 +104,12 @@ def depth_callback(depth_msg):
     point_depth = depth[max_pixel[0], max_pixel[1]]
 
     # Compute the actual position.
-    x = (max_pixel[1] - cx)/(fx) * point_depth
-    y = (max_pixel[0] - cy)/(fy) * point_depth
+    x = (max_pixel[1] - cx)/fx * point_depth
+    y = (max_pixel[0] - cy)/fy * point_depth
     z = point_depth
 
     if np.isnan(z):
         return
-
 
     # Draw grasp markers on the points_out and publish it. (for visualisation)
     grasp_img = cv2.applyColorMap((points_out * 255).astype(np.uint8), cv2.COLORMAP_JET)
@@ -123,18 +120,14 @@ def depth_callback(depth_msg):
     grasp_img[rr, cc, 1] = 255
     grasp_img[rr, cc, 2] = 0
 
-
     # Publish the output images (not used for control, only visualisation)
-    # grasp_img = bridge.cv2_to_imgmsg(grasp_img, 'bgr8')
     grasp_img = numpy_to_imgmsg(grasp_img)
     grasp_img.header = depth_msg.header
     grasp_pub.publish(grasp_img)
 
     grasp_img_plain = numpy_to_imgmsg(grasp_img_plain)
-    # grasp_img_plain = bridge.cv2_to_imgmsg(grasp_img_plain, 'bgr8')
     grasp_img_plain.header = depth_msg.header
     grasp_plain_pub.publish(grasp_img_plain)
-
 
     depth_pub.publish(numpy_to_imgmsg(depth_crop))
 

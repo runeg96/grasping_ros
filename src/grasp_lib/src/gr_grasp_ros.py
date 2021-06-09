@@ -6,29 +6,24 @@ import os
 import sys
 import rospy
 
-ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(ROOT_DIR, '../../gr_grasp'))
-
 import argparse
 import logging
 
-
 import numpy as np
+import cv2
 import torch.utils.data
 
-from grasp_utils.utils import pixel_to_camera, width_pixel_to_m
 from grasp_lib.msg import Grasp, Grasps
 
 from sensor_msgs.msg import Image, CameraInfo
-from scipy.spatial.transform import Rotation
 
 from hardware.device import get_device
 from inference.post_process import post_process_output
 from utils.dataset_processing.grasp import detect_grasps
 from utils.data.camera_data import CameraData
 
-import cv2
-
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(ROOT_DIR, '../../gr_grasp'))
 
 logging.basicConfig(level=logging.INFO)
 
@@ -46,19 +41,19 @@ def parse_args():
     parser.add_argument('--cpu', dest='force_cpu', action='store_true', default=False,
                         help='Force code to run in CPU mode')
     args, unknown = parser.parse_known_args()
-    # args = parser.parse_args()
+
     return args
 
 
 def parse_grasp_to_rviz(grasp_center, width_pixel, quality, angle):
-        vis_grasp = Grasp()
-        vis_grasp.name = "gr"
-        vis_grasp.pose2D.x = grasp_center[1] + 208
-        vis_grasp.pose2D.y = grasp_center[0] + 128
-        vis_grasp.pose2D.theta = - angle
-        vis_grasp.width_pixel = width_pixel
-        vis_grasp.quality = quality
-        grasp_pub.publish(vis_grasp)
+    vis_grasp = Grasp()
+    vis_grasp.name = "gr"
+    vis_grasp.pose2D.x = grasp_center[1] + 208
+    vis_grasp.pose2D.y = grasp_center[0] + 128
+    vis_grasp.pose2D.theta = - angle
+    vis_grasp.width_pixel = width_pixel
+    vis_grasp.quality = quality
+    grasp_pub.publish(vis_grasp)
 
 
 def parse_grasps_to_rviz(grasps):
@@ -80,8 +75,8 @@ def parse_grasps_to_rviz(grasps):
 
     grasps_pub.publish(vis_grasps)
 
-def numpy_to_imgmsg(image, stamp=None):
 
+def numpy_to_imgmsg(image, stamp=None):
     rosimage = Image()
     rosimage.height = image.shape[0]
     rosimage.width = image.shape[1]
@@ -119,9 +114,10 @@ if __name__ == '__main__':
         color_msg = rospy.wait_for_message('ptu_camera/camera/color/image_raw', Image, timeout=rospy.Duration(1))
         rgb_image = np.frombuffer(color_msg.data, dtype=np.uint8).reshape(color_msg.height, color_msg.width, -1)
 
-        depth_msg = rospy.wait_for_message('ptu_camera/camera/aligned_depth_to_color/image_raw', Image, timeout=rospy.Duration(1))
-        depth_image = np.frombuffer(depth_msg.data, dtype=np.uint16).reshape(depth_msg.height, depth_msg.width,-1)
-        depth_image = depth_image.astype(np.float32)/1000
+        depth_msg = rospy.wait_for_message('ptu_camera/camera/aligned_depth_to_color/image_raw', Image,
+                                           timeout=rospy.Duration(1))
+        depth_image = np.frombuffer(depth_msg.data, dtype=np.uint16).reshape(depth_msg.height, depth_msg.width, -1)
+        depth_image = depth_image.astype(np.float32) / 1000
 
         x, depth_img, rgb_img = cam_data.get_data(rgb=None, depth=depth_image)
 
@@ -130,17 +126,17 @@ if __name__ == '__main__':
             pred = net.predict(xc)
 
             q_img, ang_img, width_img = post_process_output(pred['pos'], pred['cos'], pred['sin'], pred['width'])
-            q_img = np.clip(q_img, 0.0, 1.0-1e-3)
-            grasps = detect_grasps(q_img, ang_img, width_img,args.n_grasps)
+            q_img = np.clip(q_img, 0.0, 1.0 - 1e-3)
+            grasps = detect_grasps(q_img, ang_img, width_img, args.n_grasps)
 
-            grasp_img = cv2.applyColorMap((q_img*255).astype(np.uint8), cv2.COLORMAP_JET)
+            grasp_img = cv2.applyColorMap((q_img * 255).astype(np.uint8), cv2.COLORMAP_JET)
 
             grasp_img = numpy_to_imgmsg(grasp_img)
             grasp_img.header = depth_msg.header
             grasp_img_pub.publish(grasp_img)
             # print(grasps)
             try:
-                parse_grasp_to_rviz(grasps[0].center,grasps[0].width, grasps[0].quality, grasps[0].angle)
+                parse_grasp_to_rviz(grasps[0].center, grasps[0].width, grasps[0].quality, grasps[0].angle)
                 parse_grasps_to_rviz(grasps)
             except Exception as e:
                 print(e)
