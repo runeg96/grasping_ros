@@ -35,42 +35,47 @@ parser.add_argument('--checkpoint_path', required=True, help='Model checkpoint p
 parser.add_argument('--mask_path', required=True, help='Path to binary mask')
 parser.add_argument('--num_point', type=int, default=20000, help='Point Number [default: 20000]')
 parser.add_argument('--num_view', type=int, default=300, help='View Number [default: 300]')
-parser.add_argument('--collision_thresh', type=float, default=0.01, help='Collision Threshold in collision detection [default: 0.01]')
-parser.add_argument('--voxel_size', type=float, default=0.01, help='Voxel Size to process point clouds before collision detection [default: 0.01]')
+parser.add_argument('--collision_thresh', type=float, default=0.01,
+                    help='Collision Threshold in collision detection [default: 0.01]')
+parser.add_argument('--voxel_size', type=float, default=0.01,
+                    help='Voxel Size to process point clouds before collision detection [default: 0.01]')
 cfgs, unknown = parser.parse_known_args()
+
 
 def get_net():
     # Init the model
     net = GraspNet(input_feature_dim=0, num_view=cfgs.num_view, num_angle=12, num_depth=4,
-            cylinder_radius=0.05, hmin=-0.02, hmax_list=[0.01,0.02,0.03,0.04], is_training=False)
+                   cylinder_radius=0.05, hmin=-0.02, hmax_list=[0.01, 0.02, 0.03, 0.04], is_training=False)
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     net.to(device)
     # Load checkpoint
     checkpoint = torch.load(cfgs.checkpoint_path)
     net.load_state_dict(checkpoint['model_state_dict'])
     start_epoch = checkpoint['epoch']
-    print("-> loaded checkpoint %s (epoch: %d)"%(cfgs.checkpoint_path, start_epoch))
+    print("-> loaded checkpoint %s (epoch: %d)" % (cfgs.checkpoint_path, start_epoch))
     # set model to eval mode
     net.eval()
     return net
+
 
 def get_and_process_data():
     # load data
     color_msg = rospy.wait_for_message('ptu_camera/camera/color/image_raw', Img, timeout=rospy.Duration(1))
     color_img = np.frombuffer(color_msg.data, dtype=np.uint8).reshape(color_msg.height, color_msg.width, -1)
 
-    depth_msg = rospy.wait_for_message('ptu_camera/camera/aligned_depth_to_color/image_raw', Img, timeout=rospy.Duration(1))
+    depth_msg = rospy.wait_for_message('ptu_camera/camera/aligned_depth_to_color/image_raw', Img,
+                                       timeout=rospy.Duration(1))
     depth = np.frombuffer(depth_msg.data, dtype=np.uint16).reshape(depth_msg.height, depth_msg.width)
 
-    color = np.array((color_img), dtype=np.float32) / 255.0
-
+    color = np.array(color_img, dtype=np.float32) / 255.0
 
     workspace_mask = np.array(Image.open(cfgs.mask_path), dtype=bool)
 
     cam_info = rospy.wait_for_message('ptu_camera/camera/color/camera_info', CamInfo, timeout=rospy.Duration(1))
 
     # generate cloud
-    camera = CameraInfo(cam_info.width, cam_info.height, cam_info.K[0], cam_info.K[4], cam_info.K[2], cam_info.K[5], 1000)
+    camera = CameraInfo(cam_info.width, cam_info.height, cam_info.K[0], cam_info.K[4], cam_info.K[2], cam_info.K[5],
+                        1000)
     cloud = create_point_cloud_from_depth_image(depth, camera, organized=True)
 
     # get valid points
@@ -83,7 +88,7 @@ def get_and_process_data():
         idxs = np.random.choice(len(cloud_masked), cfgs.num_point, replace=False)
     else:
         idxs1 = np.arange(len(cloud_masked))
-        idxs2 = np.random.choice(len(cloud_masked), cfgs.num_point-len(cloud_masked), replace=True)
+        idxs2 = np.random.choice(len(cloud_masked), cfgs.num_point - len(cloud_masked), replace=True)
         idxs = np.concatenate([idxs1, idxs2], axis=0)
     cloud_sampled = cloud_masked[idxs]
     color_sampled = color_masked[idxs]
@@ -101,6 +106,7 @@ def get_and_process_data():
 
     return end_points, cloud
 
+
 def get_grasps(net, end_points):
     # Forward pass
     with torch.no_grad():
@@ -110,11 +116,13 @@ def get_grasps(net, end_points):
     gg = GraspGroup(gg_array)
     return gg
 
+
 def collision_detection(gg, cloud):
     mfcdetector = ModelFreeCollisionDetector(cloud, voxel_size=cfgs.voxel_size)
     collision_mask = mfcdetector.detect(gg, approach_dist=0.05, collision_thresh=cfgs.collision_thresh)
     gg = gg[~collision_mask]
     return gg
+
 
 def vis_grasps(gg, cloud):
     gg.nms()
@@ -122,6 +130,7 @@ def vis_grasps(gg, cloud):
     gg = gg[:50]
     grippers = gg.to_open3d_geometry_list()
     o3d.visualization.draw_geometries([cloud, *grippers])
+
 
 def demo():
     global net
@@ -131,9 +140,10 @@ def demo():
         gg = collision_detection(gg, np.array(cloud.points))
     gg.sort_by_score()
     print(gg[0])
-    grasp_paser(gg[0])
+    grasp_parser(gg[0])
     grasps_parser(gg)
     # vis_grasps(gg, cloud)
+
 
 def grasps_parser(gg):
     temp_grasp = Grasp()
@@ -162,8 +172,7 @@ def grasps_parser(gg):
     grasps_pub.publish(vis_grasps)
 
 
-
-def grasp_paser(gg):
+def grasp_parser(gg):
     vis_grasp = Grasp()
     vis_grasp.name = "baseline"
     vis_grasp.pose.position.x = gg.translation[0]
@@ -182,7 +191,8 @@ def grasp_paser(gg):
 
     grasp_pub.publish(vis_grasp)
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     rospy.init_node('graspnet_baseline_ros')
     grasp_pub = rospy.Publisher(rospy.get_param("visualize_grasp/input/grasp_topic"), Grasp, queue_size=1)
     grasps_pub = rospy.Publisher(rospy.get_param("visualize_grasp/input/grasps_topic"), Grasps, queue_size=1)

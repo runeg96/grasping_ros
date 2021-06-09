@@ -19,8 +19,8 @@ def parse_args():
 
 def cornell_format(center, angle, width=60, height=30):
     """
-    Convert to GraspRectangle
-    :return: GraspRectangle representation of grasp.
+    Convert to Cornell Grasp Rectangle format
+    :return: Cornell Grasp Rectangle representation of grasp.
     """
     xo = np.cos(angle)
     yo = np.sin(angle)
