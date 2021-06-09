@@ -25,9 +25,9 @@ cmd_pub = rospy.Publisher('ggcnn/out/command', Float32MultiArray, queue_size=1)
 prev_mp = np.array([150, 150])
 
 # Get the camera parameters
-print("Wait for cam info")
+print("Waiting for camera info")
 camera_info_msg = rospy.wait_for_message('/ptu_camera/camera/aligned_depth_to_color/camera_info', CameraInfo)
-print("found cam info")
+print("Found camera info")
 K = camera_info_msg.K
 fx = K[0]
 cx = K[2]
@@ -80,7 +80,7 @@ def depth_callback(depth_msg):
     if ALWAYS_MAX:
         # Track the global max.
         max_pixel = np.array(np.unravel_index(np.argmax(points_out), points_out.shape))
-        score = points_out[max_pixel[0],max_pixel[1]]
+        score = points_out[max_pixel[0], max_pixel[1]]
         prev_mp = max_pixel.astype(np.int)
     else:
         # Calculate a set of local maxes.  Choose the one that is closes to the previous one.
