@@ -19,6 +19,7 @@ grasp_pub = rospy.Publisher('ggcnn/img/grasp', Image, queue_size=1)
 grasp_plain_pub = rospy.Publisher('ggcnn/img/grasp_plain', Image, queue_size=1)
 depth_pub = rospy.Publisher('ggcnn/img/depth', Image, queue_size=1)
 ang_pub = rospy.Publisher('ggcnn/img/ang', Image, queue_size=1)
+width_pub = rospy.Publisher('ggcnn/img/width', Image, queue_size=1)
 cmd_pub = rospy.Publisher('ggcnn/out/command', Float32MultiArray, queue_size=1)
 
 # Initialise some globals.
@@ -113,6 +114,14 @@ def depth_callback(depth_msg):
 
     # Draw grasp markers on the points_out and publish it. (for visualisation)
     grasp_img = cv2.applyColorMap((points_out * 255).astype(np.uint8), cv2.COLORMAP_JET)
+    ang_out = ang_out.astype(np.float32) + abs(ang_out.min())
+    ang_out = ang_out/ang_out.max()
+
+    ang_img = cv2.applyColorMap((ang_out*-255).astype(np.uint8), cv2.COLORMAP_JET)
+    width_out = width_out.astype(np.float32) + abs(width_out.min())
+    width_out = width_out/width_out.max()
+    # width_out -= width_out.mean()
+    width_img = cv2.applyColorMap((width_out * 255).astype(np.uint8), cv2.COLORMAP_JET)
     grasp_img_plain = grasp_img.copy()
 
     rr, cc = circle(prev_mp[0], prev_mp[1], 5)
@@ -130,8 +139,13 @@ def depth_callback(depth_msg):
     grasp_plain_pub.publish(grasp_img_plain)
 
     depth_pub.publish(numpy_to_imgmsg(depth_crop))
+    ang_img = numpy_to_imgmsg(ang_img)
+    ang_img.header = depth_msg.header
+    ang_pub.publish(ang_img)
 
-    ang_pub.publish(numpy_to_imgmsg(ang_out))
+    width_img = numpy_to_imgmsg(width_img)
+    width_img.header = depth_msg.header
+    width_pub.publish(width_img)
 
     # Output the best grasp pose relative to camera.
     cmd_msg = Float32MultiArray()
