@@ -7,6 +7,7 @@ import tf2_geometry_msgs
 from std_msgs.msg import Float32MultiArray
 from geometry_msgs.msg import PoseStamped
 from grasp_lib.msg import Grasp
+import math
 
 
 def gg_callback(msg):
@@ -17,7 +18,7 @@ def gg_callback(msg):
     new_grasp.name = "ggcnn"
     new_grasp.pose2D.x = msg.data[7]
     new_grasp.pose2D.y = msg.data[6]
-    new_grasp.pose2D.theta = msg.data[3]
+    new_grasp.pose2D.theta = msg.data[3] * math.pi
     new_grasp.width_meter = msg.data[4]/1000
 
     new_grasp.quality = msg.data[8]
