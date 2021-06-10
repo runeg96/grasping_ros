@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
 
 <launch>
-  <node name="ggcnn" pkg="grasp_lib" type="ggcnn_wrapper/ggcnn_predict_rt.py" output="screen"/>
+  <node name="ggcnn" pkg="grasp_lib" type="ggcnn_predict_rt.py" output="screen"/>
 </launch>
