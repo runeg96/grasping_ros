@@ -29,7 +29,7 @@ def draw_grasp(grasp, image, camInfo):
     Points.append(grasp_center)
 
     width_img = grasp.width_pixel
-    yaw = grasp.pose2D.theta + 1.5707
+    yaw = grasp.pose2D.theta
 
     # Calculate end points of gripper fingers (based on width and angle)
     Points.append((grasp_center[0]-math.cos(yaw)*width_img, grasp_center[1]-math.sin(yaw)*width_img))
@@ -166,7 +166,7 @@ def fill_grasp(grasp):
         grasp.pose.position.y = grasp_point[1]
         grasp.pose.position.z = grasp_point[2]
 
-        rot = Rotation.from_euler('xyz', [0, 0, grasp.pose2D.theta])
+        rot = Rotation.from_euler('xyz', [-grasp.pose2D.theta, 0, 0])
         q = rot.as_quat()
         grasp.pose.orientation.x = q[0]
         grasp.pose.orientation.y = q[1]
