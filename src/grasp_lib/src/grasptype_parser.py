@@ -26,11 +26,10 @@ def gg_callback(msg):
 
 
 def vgn_callback(msg):
-
     transform = tf_buffer.lookup_transform("ptu_camera_color_optical_frame",
-                                       "task", # source frame
-                                       rospy.Time(0), # get the tf at first available time
-                                       rospy.Duration(1.0)) # wait for 1 second
+                                           "task",  # source frame
+                                           rospy.Time(0),  # get the tf at first available time
+                                           rospy.Duration(1.0))  # wait for 1 second
 
     pose_stamp = PoseStamped()
     pose_stamp.header.frame_id = "task"
@@ -45,7 +44,7 @@ def vgn_callback(msg):
 
 rospy.init_node("grasptype_parser_node")
 
-tf_buffer = tf2_ros.Buffer(rospy.Duration(1200.0)) # tf buffer length
+tf_buffer = tf2_ros.Buffer(rospy.Duration(1200.0))  # tf buffer length
 tf_listener = tf2_ros.TransformListener(tf_buffer)
 
 grasp_pub = rospy.Publisher(rospy.get_param("visualize_grasp/input/grasp_topic"), Grasp, queue_size=1)

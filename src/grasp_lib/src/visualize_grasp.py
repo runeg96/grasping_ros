@@ -161,7 +161,7 @@ def fill_grasp(grasp):
 
     # Construct 3D pose from 2D
     if grasp.pose.position.x == 0.0 and grasp.pose.position.y == 0.0 and grasp.pose.position.z == 0.0:
-        grasp_point = pixel_to_camera(ci,(grasp.pose2D.x, grasp.pose2D.y), depth_m)
+        grasp_point = pixel_to_camera(ci, (grasp.pose2D.x, grasp.pose2D.y), depth_m)
         grasp.pose.position.x = grasp_point[0]
         grasp.pose.position.y = grasp_point[1]
         grasp.pose.position.z = grasp_point[2]
