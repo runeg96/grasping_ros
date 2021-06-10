@@ -124,10 +124,11 @@ def depth_callback(depth_msg):
     width_img = cv2.applyColorMap((width_out * 255).astype(np.uint8), cv2.COLORMAP_JET)
     grasp_img_plain = grasp_img.copy()
 
-    rr, cc = circle(prev_mp[0], prev_mp[1], 5)
-    grasp_img[rr, cc, 0] = 0
-    grasp_img[rr, cc, 1] = 255
-    grasp_img[rr, cc, 2] = 0
+    if score > 0.2:
+        rr, cc = circle(prev_mp[0], prev_mp[1], 5)
+        grasp_img[rr, cc, 0] = 0
+        grasp_img[rr, cc, 1] = 255
+        grasp_img[rr, cc, 2] = 0
 
     # Publish the output images (not used for control, only visualisation)
     grasp_img = numpy_to_imgmsg(grasp_img)
