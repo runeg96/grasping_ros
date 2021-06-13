@@ -17,11 +17,14 @@ robot_client = robot.Robot()
 group = robot_client.right_arm
 
 robot_client.rs_gripper.activateGripper()
-
+count = 0
 
 while not rospy.is_shutdown():
     robot_client.rs_gripper.genCommand("open")
     robot_client.rs_gripper.genCommand("pinch")
+
+    raw_input("Press enter")
+    print("counter: ",count)
 
     robot_client.setNamedTarget("ready", "right", move=True)
     current_pose = group.get_current_pose().pose
@@ -58,7 +61,10 @@ while not rospy.is_shutdown():
     robot_client.rs_gripper.genCommand("open")
 
     waypoints = list()
-    pose.position.z = trans[2] - 0.02
+    pose.position.z = trans[2] - 0.01
+    pose.position.y = trans[1] - 0.01
+    if trans[2] < 1.04:
+        trans[2] = 1.04
     waypoints.append(pose)
     robot_client.linear_move("right",waypoints)
 
@@ -81,7 +87,7 @@ while not rospy.is_shutdown():
 
     robot_client.rs_gripper.genCommand("open")
 
-
+    count += 1
 # -0.69699
 # 0.01604
 # 0.71689
