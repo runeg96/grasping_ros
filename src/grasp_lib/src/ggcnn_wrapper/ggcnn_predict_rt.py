@@ -10,6 +10,7 @@ from skimage.feature import peak_local_max
 from sensor_msgs.msg import Image, CameraInfo
 from std_msgs.msg import Float32MultiArray
 from ggcnn_torch import predict
+from sklearn.cluster import DBSCAN
 
 
 rospy.init_node('ggcnn_detection')
@@ -80,7 +81,10 @@ def depth_callback(depth_msg):
 
     if ALWAYS_MAX:
         # Track the global max.
-        max_pixel = np.array(np.unravel_index(np.argmax(points_out), points_out.shape))
+        max_pixels = np.argwhere(points_out == np.amax(points_out))
+        clustering = DBSCAN(eps=5, min_samples=1).fit(max_pixels)
+        max_pixel = np.mean(max_pixels[clustering.labels_ == 0],axis=0).astype(np.int64)
+
         score = points_out[max_pixel[0], max_pixel[1]]
         prev_mp = max_pixel.astype(np.int)
     else:
