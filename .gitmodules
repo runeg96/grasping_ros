@@ -37,5 +37,5 @@
 	url = https://github.com/runeg96/robotic-grasping.git
 	branch = lh7
 [submodule "egad"]
-	path = egad
+	path = src/egad
 	url = https://github.com/dougsm/egad.git
