@@ -49,14 +49,14 @@ This loads a special rviz configuration that is already subscribed to the releva
 
 Inside the launch folder in *grasp_lib*, launch files for launching different grasping networks (inference) can be found. Some default models are available; however, some might need to be trained from scratch or downloaded from the original repos. The specific model can be specified in each launch file. Make sure to follow the installation of the chosen grasping repo before starting the grasp generation. 
 
-[**install GG-CNN**](https://github.com/dougsm/ggcnn) and launch GG-CNN:
+[**Install GG-CNN**](https://github.com/dougsm/ggcnn) and launch GG-CNN:
 ```shell
 roslaunch grasp_lib ggcnn_ros.launch # Uses best Graspnet model as default.
 or
 roslaunch grasp_lib ggcnn_ros.launch network:=path/to/model
 ```
 
-[**install GR-ConvNet**](https://github.com/runeg96/robotic-grasping/tree/038a5723b54300cf3dfa1663aa8a9b49f3606218) and launch GR-ConvNet:
+[**Install GR-ConvNet**](https://github.com/runeg96/robotic-grasping/tree/038a5723b54300cf3dfa1663aa8a9b49f3606218) and launch GR-ConvNet:
 ```shell
 roslaunch grasp_lib gr_grasp_ros.launch # Uses default model.
 or
