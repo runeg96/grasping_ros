@@ -126,7 +126,7 @@ cd path_to_workspace/src/lh7-handover/grasping_ros/src/gr_grasp
 python3 train_network.py --dataset name_of_dataset --dataset-path path_to_dataset 
 ```
 
-Name of dataset spesifies which dataset to use it can be one of the following names:
+The name of dataset spesifies which dataset to use. It can be one of the following names:
 - cornell
 - jacquard
 - graspnet
