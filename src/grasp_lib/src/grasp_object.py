@@ -63,8 +63,8 @@ while not rospy.is_shutdown():
     waypoints = list()
     pose.position.z = trans[2] - 0.01
     pose.position.y = trans[1] - 0.01
-    if trans[2] < 1.04:
-        trans[2] = 1.04
+    if trans[2] < 1.05:
+        trans[2] = 1.05
     waypoints.append(pose)
     robot_client.linear_move("right",waypoints)
 
