@@ -1,5 +1,6 @@
 <?xml version="1.0" ?>
 
 <launch>
-  <node name="gr_grasp" pkg="grasp_lib" type="gr_grasp_ros.py" args="--network $(find grasp_lib)/resources/epoch_19_iou_0.98" output="screen"/>
+  <arg name="network" default="$(find grasp_lib)/resources/epoch_19_iou_0.98" />
+  <node name="gr_grasp" pkg="grasp_lib" type="gr_grasp_ros.py" args="--network $(arg network)" output="screen"/>
 </launch>
