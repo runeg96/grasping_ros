@@ -83,7 +83,7 @@ if __name__ == '__main__':
         "graspnet": "/raid/Graspnet/Graspnet"
     }
 
-    test_dataset = Dataset(dataset_path[args.dataset], start=args.split, end=1.0, ds_rotate=args.ds_rotate,
+    test_dataset = Dataset(args.dataset_path, start=args.split, end=1.0, ds_rotate=args.ds_rotate,
                            random_rotate=args.augment, random_zoom=args.augment,
                            include_depth=args.use_depth, include_rgb=args.use_rgb)
 
