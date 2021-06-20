@@ -47,12 +47,21 @@ This loads a special rviz configuration that is already subscribed to the releva
 
 ### Grasp Generation
 
-Inside the launch folder in *grasp_lib*, launch files for launching different grasping networks (inference) can be found. Some default models are available; however, some might need to be trained from scratch or downloaded from the original repos. The specific model can be specified in each launch file. 
+Inside the launch folder in *grasp_lib*, launch files for launching different grasping networks (inference) can be found. Some default models are available; however, some might need to be trained from scratch or downloaded from the original repos. The specific model can be specified in each launch file. Make sure to follow the installation of the choosen grasping repo before starting the grasp generation. 
 
+[**install GG-CNN**](https://github.com/dougsm/ggcnn) and Launch GG-CNN:
 ```shell
-roslaunch grasp_lib ???
+roslaunch grasp_lib ggcnn_ros.launch # uses default model. Best model Graspnet
+or
+roslaunch grasp_lib ggcnn_ros.launch network:=path/to/model
 ```
 
+[**install GG-CNN**](https://github.com/runeg96/robotic-grasping/tree/038a5723b54300cf3dfa1663aa8a9b49f3606218) and Launch GR-Covnet:
+```shell
+roslaunch grasp_lib gr_grasp_ros.launch # uses default model.
+or
+roslaunch grasp_lib gr_grasp_ros.launch network:=path/to/model 
+```
 
 ## Training and Evaluation
 
@@ -98,28 +107,50 @@ To get the datasets they can be downloaded from different places.
     |
     `-- scene_0189
 ```
+#### Multi-view
+
+1. Download and extract the [Multi-view Dataset](https://www.kaggle.com/runegrnhj/cornell-inspired-multiview-grasping-dataset).
 
 ### Training
 
 To train *ggcnn* or *gr_grasp* on a set of data, the following has to be run respectively:
 
 ```shell
-python ???
+# cd into the GG-CNN workspace
+cd path_to_workspace/src/lh7-handover/grasping_ros/src/grasp_lib/src/ggcnn_wrapper
+python3 train_ggcnn.py --dataset name_of_dataset --dataset-path path_to_dataset --network ggcnn2
 ```
 
 ```shell
-python ???
+cd path_to_workspace/src/lh7-handover/grasping_ros/src/gr_grasp
+python3 train_network.py --dataset name_of_dataset --dataset-path path_to_dataset 
 ```
+
+Name of dataset spesifies which dataset to use it can be one of the following names:
+- cornell
+- jacquard
+- graspnet
+- custom
+
+The custom dataset name is to use our own [**Multi-view dataset**](https://www.kaggle.com/runegrnhj/cornell-inspired-multiview-grasping-dataset).
+
+#### Example
+Traning GG-CNN2 with cornell
+```shell
+python3 train_ggcnn.py --dataset cornell --dataset-path /Downloads/cornell --network ggcnn2
+```
+
 
 ### Evaluation
 
 To evaluate *ggcnn* or *gr_grasp* on a dataset, the following has to be run respectively:
 
-
 ```shell
-python ???
+cd path_to_workspace/src/lh7-handover/grasping_ros/src/grasp_lib/src/ggcnn_wrapper
+python3 ggcnn_eval.py --dataset dataset_name --dataset-path path_to_dataset --network path_to_model
 ```
 
 ```shell
-python ???
+cd path_to_workspace/src/lh7-handover/grasping_ros/src/gr_grasp
+python3 evaluate.py --dataset dataset_name --dataset-path path_to_dataset --network path_to_model
 ```
