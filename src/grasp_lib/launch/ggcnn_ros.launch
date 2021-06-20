@@ -1,5 +1,6 @@
 <?xml version="1.0" ?>
 
 <launch>
-  <node name="ggcnn" pkg="grasp_lib" type="ggcnn_predict_rt.py" output="screen"/>
+  <arg name="network" default="$(find grasp_lib)/resources/ggcnn_models/Graspnet/epoch_23_iou_0.94" />
+  <node name="ggcnn" pkg="grasp_lib" type="ggcnn_predict_rt.py" args="--network $(arg network)" output="screen"/>
 </launch>
