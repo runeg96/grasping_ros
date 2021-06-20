@@ -13,7 +13,7 @@ ROOT_DIR = path.dirname(path.abspath(__file__))
 sys.path.append(path.join(ROOT_DIR, '../../../ggcnn'))
 
 # MODEL_FILE = '../../resources/ggcnn_models/Cornell/epoch_495_iou_0.82'
-MODEL_FILE = '/home/slave/Documents/workspaces/handover_ws/src/lh7-handover/grasping_ros/src/grasp_lib/src/ggcnn_wrapper/output/models/210428_1116_adamw/epoch_39_iou_0.94'
+MODEL_FILE = '/home/slave/Documents/workspaces/handover_ws/src/lh7-handover/grasping_ros/src/grasp_lib/resources/ggcnn_models/Cornell/epoch_710_iou_0.90'
 
 if torch.cuda.is_available():
     device = torch.device('cuda:0')
@@ -22,6 +22,13 @@ else:
     device = torch.device('cpu')
 
 model = torch.load(path.join(path.dirname(__file__), MODEL_FILE), map_location=device)
+
+
+def set_model(model_file):
+    global model
+    model = torch.load(path.join(path.dirname(__file__), model_file), map_location=device)
+    print("model have been set to: ", model_file)
+
 
 
 def process_depth_image(depth, crop_size, out_size=300, return_mask=False, crop_y_offset=0):
@@ -62,6 +69,7 @@ def process_depth_image(depth, crop_size, out_size=300, return_mask=False, crop_
 
 
 def predict(depth, process_depth=True, crop_size=300, out_size=300, depth_nan_mask=None, crop_y_offset=0, filters=(2.0, 1.0, 1.0)):
+    
     if process_depth:
         depth, depth_nan_mask = process_depth_image(depth, crop_size, out_size=out_size, return_mask=True, crop_y_offset=crop_y_offset)
 

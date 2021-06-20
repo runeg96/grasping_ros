@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 import rospy
-
+import argparse
 import numpy as np
 
 import cv2
@@ -9,7 +9,7 @@ from skimage.feature import peak_local_max
 
 from sensor_msgs.msg import Image, CameraInfo
 from std_msgs.msg import Float32MultiArray
-from ggcnn_torch import predict
+import ggcnn_torch
 from sklearn.cluster import DBSCAN
 
 
@@ -37,6 +37,19 @@ fy = K[4]
 cy = K[5]
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(description='Evaluate network')
+    parser.add_argument('--network', type=str, default='/home/slave/Documents/workspaces/handover_ws/src/lh7-handover/grasping_ros/src/grasp_lib/resources/ggcnn_models/Cornell/epoch_710_iou_0.90',
+                        help='Path to saved network to evaluate')
+    args, unknown = parser.parse_known_args()
+
+    return args
+
+
+args = parse_args()
+ggcnn_torch.set_model(args.network)
+
+#Convert Numpy image to ros image
 def numpy_to_imgmsg(image, stamp=None):
 
     rosimage = Image()
@@ -60,15 +73,17 @@ def depth_callback(depth_msg):
     global prev_mp
     global fx, cx, fy, cy
 
+    #Convert ros image to Numpy image
     depth = np.frombuffer(depth_msg.data, dtype=np.uint16).reshape(depth_msg.height, depth_msg.width)
     depth = depth.astype(np.float32)/1000
-    # depth = depth/1000
+
     # Crop a square out of the middle of the depth and resize it to 300*300
     crop_size = 300
     crop_offset = 40
     out_size = 300
 
-    points_out, ang_out, width_out, depth_crop = predict(depth, crop_size=crop_size, out_size=out_size, crop_y_offset=crop_offset, filters=(2.0, 2.0, 2.0))
+    # fedforward image though netowrk
+    points_out, ang_out, width_out, depth_crop = ggcnn_torch.predict(depth, crop_size=crop_size, out_size=out_size, crop_y_offset=crop_offset, filters=(2.0, 2.0, 2.0))
 
     # Figure out roughly the depth in mm of the part between the grippers for collision avoidance.
     depth_center = depth_crop[100:141, 130:171].flatten()
@@ -80,9 +95,13 @@ def depth_callback(depth_msg):
     ALWAYS_MAX = True  # Use ALWAYS_MAX = True for the open-loop solution.
 
     if ALWAYS_MAX:
-        # Track the global max.
+        # Find all the max values
         max_pixels = np.argwhere(points_out == np.amax(points_out))
+
+        #Cluster the max values
         clustering = DBSCAN(eps=5, min_samples=1).fit(max_pixels)
+
+        # Find the best grasp at pxiel by finding the mean of the first cluster
         max_pixel = np.mean(max_pixels[clustering.labels_ == 0],axis=0).astype(np.int64)
 
         score = points_out[max_pixel[0], max_pixel[1]]
@@ -98,6 +117,7 @@ def depth_callback(depth_msg):
         # Keep a global copy for next iteration.
         prev_mp = (max_pixel * 0.25 + prev_mp * 0.75).astype(np.int)
 
+    # Find the angle and width at the best grasp pixel
     ang = ang_out[max_pixel[0], max_pixel[1]]
     width = width_out[max_pixel[0], max_pixel[1]]
 
@@ -128,6 +148,7 @@ def depth_callback(depth_msg):
     width_img = cv2.applyColorMap((width_out * 255).astype(np.uint8), cv2.COLORMAP_JET)
     grasp_img_plain = grasp_img.copy()
 
+    # Draw green dot where the best grasp is
     if score > 0.2:
         rr, cc = circle(prev_mp[0], prev_mp[1], 5)
         grasp_img[rr, cc, 0] = 0
